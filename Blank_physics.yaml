@@ -1,0 +1,25 @@
+name: Blank_physics
+server_modules: []
+startup_form: Form1
+forms:
+- class_name: Form1
+  container:
+    type: GridPanel
+    properties: {row_spacing: 10}
+  components: []
+  code: "from anvil import *\n\nclass Form1(Form1Template):\n\n  def __init__(self):\n\
+    \    # This sets up a variable for every component on this form.\n    # For example,\
+    \ if we've drawn a button called \"send_button\", we can\n    # refer to it as\
+    \ self.send_button:\n    self.init_components()\n\n    # Any code you write here\
+    \ will run when the form opens.\n"
+  $$hashKey: 5678
+services:
+- source: https://googledrive.com/host/0B4vNASfKS0OUfmxWQU5ic0NKTXROU0h5VTRTUHM3QW9Dal9IbkVzS2hybFdKTmJ6Tkhld1U/isaac.yml
+  client_config: {}
+  server_config: {}
+  $$hashKey: object:3431
+- source: https://googledrive.com/host/0B64-jtRjOa-bem9fVUdqMG5WdTQ/physics.yml
+  client_config: {}
+  server_config: {}
+  $$hashKey: object:3432
+
