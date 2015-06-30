@@ -12,7 +12,7 @@ forms:
     \ if we've drawn a button called \"send_button\", we can\n    # refer to it as\
     \ self.send_button:\n    self.init_components()\n\n    # Any code you write here\
     \ will run when the form opens.\n"
-  $$hashKey: 5678
+  $$hashKey: object:5678
 services:
 - source: https://googledrive.com/host/0B4vNASfKS0OUfmxWQU5ic0NKTXROU0h5VTRTUHM3QW9Dal9IbkVzS2hybFdKTmJ6Tkhld1U/isaac.yml
   client_config: {}
