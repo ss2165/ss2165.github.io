@@ -18,8 +18,7 @@ services:
   client_config: {}
   server_config: {}
   $$hashKey: object:3431
-- source: https://googledrive.com/host/0B64-jtRjOa-bem9fVUdqMG5WdTQ/physics.yml
+- source: http://ss2165.github.io/physics.yml
   client_config: {}
   server_config: {}
   $$hashKey: object:3432
-
