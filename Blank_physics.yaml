@@ -14,7 +14,7 @@ forms:
     \ will run when the form opens.\n"
   $$hashKey: object:5678
 services:
-- source: http://www.ss2165.github.io/physics.yml
+- source: https://googledrive.com/host/0B64-jtRjOa-bWmZremM1ck5sclE/physics.yml
   client_config: {}
   server_config: {}
   $$hashKey: object:3432
