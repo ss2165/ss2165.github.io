@@ -28,17 +28,20 @@ forms:
     properties: {interval: 0.01}
   code: "from anvil import *\nimport physics\nimport draw\nimport math\n\nclass Form1(Form1Template):\n\
     \  def btn_run_click (self, **event_args):\n    # This method is called when the\
-    \ button is clicked\n    #draw.btn_run_click(self)\n    #if not self.running:\n\
+    \ button is clicked\n      #if not self.running:\n\
     \    #  self.running  = True\n    #  self.reset = False\n    #  self.btn_run.text\
     \ = \"Pause\"\n#\n    #else:\n    #  self.running = False\n    #  self.btn_run.text\
     \ = \"Run\"\n\n\n  def btn_reset_click (self, **event_args):\n    # This method\
-    \ is called when the button is clicked\n    #draw.btn_reset_click(self)\n    #self.running\
+    \ is called when the button is clicked\n        #self.running\
     \ = False\n    #self.reset = True\n    #self.btn_run.text = \"Run\"\n\n\n  def\
     \ __init__(self):\n    # This sets up a variable for every component on this form.\n\
     \    # For example, if we've drawn a button called \"send_button\", we can\n \
     \   # refer to it as self.send_button:\n    self.init_components()\n\n    # Any\
     \ code you write here will run when the form opens.\n    #Uncomment as required.\n\
-    \    #self.running= False\n    #self.reset = True\n    #self.dt = self.timer.interval\n"
+    \    #self.running= False\n    #self.reset = True\n    #self.dt = self.timer.interval\n\
+    \    \n    #self.t = 0\n    #SET SCALE (pixels per m, or unit used in code)\n\
+    \    #self.xu = \n    \n    #APPEND ALL PARAMETER BOXES\n    #self.param_boxes=\
+    \ []"
   $$hashKey: object:5678
 services:
 - source: https://googledrive.com/host/0B64-jtRjOa-beGlseURfdnFISWc/physics.yml

@@ -64,13 +64,13 @@ def dashed_line(canvas, dashlength, x2, y2, x=0, y= 0):
 def btn_run_click(self):
     #standard switching run button
     if not self.running:
-      self.running  = True
-      self.reset = False
-      self.btn_run.text = "Pause"
+        self.running  = True
+        self.reset = False
+        self.btn_run.text = "Pause"
 
     else:
-      self.running = False
-      self.btn_run.text = "Run"
+        self.running = False
+        self.btn_run.text = "Run"
 
 def btn_reset_click (self):
     #called when reset button is clicked
