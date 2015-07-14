@@ -1,4 +1,4 @@
-name: Blank_physics
+name: Blank_Physics
 server_modules: []
 startup_form: Form1
 forms:
@@ -6,22 +6,49 @@ forms:
   container:
     type: GridPanel
     properties: {row_spacing: 10}
-  components: []
-  code: "from anvil import *\n\nclass Form1(Form1Template):\n\n  def __init__(self):\n\
-    \    # This sets up a variable for every component on this form.\n    # For example,\
-    \ if we've drawn a button called \"send_button\", we can\n    # refer to it as\
-    \ self.send_button:\n    self.init_components()\n\n    # Any code you write here\
-    \ will run when the form opens.\n"
+  components:
+  - type: Button
+    properties: {width: default, align: center, height: '', enabled: true, visible: true,
+      text: Reset, font_size: '14', italic: false, background: '', bold: false, underline: false}
+    name: btn_reset
+    layout_properties: {row: TTUYGN, width_xs: 3, col_xs: 6}
+    event_bindings: {click: btn_reset_click}
+  - type: Button
+    properties: {width: default, align: center, height: '', enabled: true, visible: true,
+      text: Run, font_size: '14', italic: false, background: '', bold: false, underline: false}
+    name: btn_run
+    layout_properties: {row: TTUYGN, width_xs: 3, col_xs: 9}
+    event_bindings: {click: btn_run_click}
+  - type: Canvas
+    properties: {width: default, height: 443}
+    name: canvas
+    layout_properties: {row: SNJBVG, width_xs: 12, col_xs: 0}
+  - name: timer
+    type: Timer
+    properties: {interval: 0.01}
+  code: "from anvil import *\nimport physics\nimport draw\nimport math\n\nclass Form1(Form1Template):\n\
+    \  def btn_run_click (self, **event_args):\n    # This method is called when the\
+    \ button is clicked\n    #draw.btn_run_click(self)\n    #if not self.running:\n\
+    \    #  self.running  = True\n    #  self.reset = False\n    #  self.btn_run.text\
+    \ = \"Pause\"\n#\n    #else:\n    #  self.running = False\n    #  self.btn_run.text\
+    \ = \"Run\"\n\n\n  def btn_reset_click (self, **event_args):\n    # This method\
+    \ is called when the button is clicked\n    #draw.btn_reset_click(self)\n    #self.running\
+    \ = False\n    #self.reset = True\n    #self.btn_run.text = \"Run\"\n\n\n  def\
+    \ __init__(self):\n    # This sets up a variable for every component on this form.\n\
+    \    # For example, if we've drawn a button called \"send_button\", we can\n \
+    \   # refer to it as self.send_button:\n    self.init_components()\n\n    # Any\
+    \ code you write here will run when the form opens.\n    #Uncomment as required.\n\
+    \    #self.running= False\n    #self.reset = True\n    #self.dt = self.timer.interval\n"
   $$hashKey: object:5678
 services:
-# - source: http://www.ss2165.github.io/service/physics.yml
-#   client_config: {}
-#   server_config: {}
-#   $$hashKey: object:3432
 - source: https://googledrive.com/host/0B64-jtRjOa-beGlseURfdnFISWc/physics.yml
   client_config: {}
   server_config: {}
   $$hashKey: object:3433
+- source: https://googledrive.com/host/0B64-jtRjOa-beGlseURfdnFISWc/draw.yml
+  client_config: {}
+  server_config: {}
+  $$hashKey: object:3434
 - source: https://googledrive.com/host/0B4vNASfKS0OUfmxWQU5ic0NKTXROU0h5VTRTUHM3QW9Dal9IbkVzS2hybFdKTmJ6Tkhld1U/isaac.yml
   client_config: {}
   server_config: {}
