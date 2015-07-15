@@ -137,8 +137,6 @@ class Form1(Form1Template):
       self.init_balls_pos()
       self.first = False
 
-    dist = (self.balls[0].pos - self.balls[1].pos)
-
     #draw everything
     self.draw_all()
 
@@ -157,7 +155,7 @@ class Form1(Form1Template):
     KEzmf = 0.5 *(self.balls[2].mass*self.balls[2].vel.mag()**2 + self.balls[3].mass*self.balls[3].vel.mag()**2)
     MOzmf = self.balls[2].momentum() + self.balls[3].momentum()
 
-    zmfvel = physics.zmf_vel(self.balls[0], self.balls[1])
+    zmfvel = self.balls[0].zmf_vel(self.balls[1])
 
     self.lbl_kelab.text = "Total KE = {0}J".format(repr(round(KElab, 3)))
     self.lbl_kezmf.text = "Total KE = {0}J".format(repr(round(KEzmf, 3)))
@@ -264,8 +262,8 @@ class Form1(Form1Template):
 
   def check(self, ball_1, ball_2, lab):
   #check for collision and draw if detected
-      if physics.collision_check(ball_1, ball_2):
-          physics.collide(ball_1, ball_2, self.radio_elastic.selected)
+      if ball_1.collision_check(ball_2):
+          ball_1.collide(ball_2, self.radio_elastic.selected)
           self.collides.append(1.0*ball_1.pos)
           self.collides.append(1.0*ball_2.pos)
           self.collided = True
@@ -309,7 +307,7 @@ class Form1(Form1Template):
       self.balls[0].radius = bigrad
 
     #subtract zmf velocity for zmf frame balls
-    v = physics.zmf_vel(self.balls[0], self.balls[1])
+    v = self.balls[0].zmf_vel(self.balls[1])
     for i in range(0,2):
         self.balls[i+2].radius  = self.balls[i].radius
         self.balls[i+2].vel = self.balls[i].vel -v

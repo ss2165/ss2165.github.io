@@ -9,13 +9,11 @@ class Form1(Form1Template):
     def timer_tick (self, **event_args):
         # This method is called Every [interval] seconds
         self.cw = self.canvas.get_width()
-        cw = self.cw
         self.ch  =self.canvas.get_height()
         ch = self.ch
 
         canvas = self.canvas
 
-        N = self.N
         L = self.L
         v = self.v
         a = self.a
