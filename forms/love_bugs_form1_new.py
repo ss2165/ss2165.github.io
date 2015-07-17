@@ -24,14 +24,15 @@ class Form1(Form1Template):
             self.xu  =self.give_xu(self.ch, self.d)
             self.newxu = self.give_xu(self.ch, self.d)
         xu = self.xu
-        if self.reset:
-            self.initial(canvas)
+        #if self.reset:
+        self.initial(canvas)
 
         draw.reset2(canvas, self.xu)
+        self.draw_path(canvas, self.path)
 
         if self.running:
             self.move_bug(self.bug)
-            self.draw_bugs(canvas, self.bug.pos, "#2a2ac7")
+            #self.draw_bugs(canvas, self.bug.pos, "#2a2ac7")
             draw.reset2(canvas, xu)
 
             if self.bug.pos.mag() <= self.bugradius:
@@ -44,15 +45,40 @@ class Form1(Form1Template):
         if self.zoom:
             self.xu += self.step
 
+        self.counter += 1
 
     def initial(self, canvas):
         draw.reset2(canvas, self.xu)
         draw.clear_canvas(canvas, "#fff")
         self.draw_polygon(canvas, self.N, self.L)
-        self.bug.pos = physics.vector3(-self.L/2, self.d, 0)
+        if self.reset:
+            self.bug.pos = physics.vector3(-self.L/2, self.d, 0)
+            self.path  = [self.bug.pos, self.bug.pos]
         draw.reset2(canvas, self.xu)
         self.draw_bugs(canvas, self.bug.pos, "#2a2ac7")
+        # for i in range(len(self.path)-1):
+        #     canvas.begin_path()
+        #     canvas.move_to(self.path[i].x, self.path[i].y)
+        #     canvas.line_to(self.path[i+1].x, self.path[i+1].y)
+        #     canvas.stroke()
+
         draw.reset2(canvas, self.xu)
+
+    def draw_path(self, canvas, poses):
+        canvas.translate(self.cw/(2.0*self.xu), self.ch/(2.0*self.xu))
+        for i in range(self.N):
+            canvas.rotate(self.a)
+
+            canvas.begin_path()
+            for j in range(1,len(poses)-1):
+                canvas.move_to(poses[j].x, poses[j].y)
+                diff = poses[j+1] - poses[j]
+                canvas.line_to((poses[j]+0.8*diff).x, (poses[j]+0.8*diff).y)
+            if i%2 ==0:
+                canvas.stroke_style = "rgb(148, 76, 190)"
+            else:
+                canvas.stroke_style = "rgb(80, 158, 46)"
+            canvas.stroke()
 
 
     def txt_change (self, **event_args):
@@ -78,7 +104,10 @@ class Form1(Form1Template):
             canvas.rotate(self.a)
             canvas.translate(pos.x, pos.y)
             draw.circle(canvas, self.bug.radius)
-            canvas.fill_style = colour
+            if i%2 ==0:
+                canvas.fill_style = "rgb(148, 76, 190)"
+            else:
+                canvas.fill_style = "rgb(80, 158, 46)"
             canvas.fill()
             canvas.translate(-pos.x, -pos.y)
 
@@ -86,6 +115,8 @@ class Form1(Form1Template):
     def move_bug(self, bug):
         aim = (bug.pos.phi_rotate(-self.a, physics.vector3(0,0,0)) - bug.pos).norm()
         bug.vel = aim*self.v
+        if self.counter % int(1/self.v) ==0:
+            self.path.append(bug.pos)
         bug.pos = bug.pos + bug.vel*self.dt
         self.t += self.dt
         self.lbl_t.text = "t = {0}s".format(repr(self.t))
@@ -129,7 +160,8 @@ class Form1(Form1Template):
         self.reset = True
         self.zoom = False
         self.bug  = physics.ball(1, self.bugradius)
-
+        self.path  = [self.bug.pos, self.bug.pos]
+        self.counter = 0
 
         self.N  =  int(self.txt_N.text)
         self.L = float(self.txt_L.text)

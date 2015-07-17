@@ -60,6 +60,14 @@ class Form1(Form1Template):
     self.init_balls()
 
 
+  def btn_velreset_click (self, **event_args):
+      if self.reset:
+          self.reset = False
+          for i in range(4):
+              self.param_boxes[i+2].text = "0"
+              self.balls[i].vel = physics.vector3(0,0)
+          self.reset = True
+
   def btn_reset_click (self, **event_args):
       #called when reset button is clicked
       self.running = False
@@ -354,6 +362,7 @@ class Form1(Form1Template):
     self.param_boxes.append(self.txt_x_2)
     self.param_boxes.append(self.txt_y_1)
     self.param_boxes.append(self.txt_y_2)
+    self.param_boxes.append(self.btn_velreset)
 
     self.starts = []
     self.collides = []

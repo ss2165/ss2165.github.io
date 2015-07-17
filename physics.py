@@ -105,68 +105,72 @@ class vector3():
         return "({0.x}, {0.y}, {0.z})".format(self)
 
 def num_bisection(function, a, b, iterations):
-	iterations  = int(math.sqrt(iterations**2))
-	if a>b:
-		a, b = b, a
-	c = (a+b)/2.0
-	for letter in (a, b, c):
-		if function(letter) == 0:
-			return letter
+    iterations  = int(math.sqrt(iterations**2))
+    if a>b:
+        a, b = b, a
+    c = (a+b)/2.0
+    for letter in (a, b, c):
+        if function(letter) == 0:
+            return letter
 
-	for i in range(iterations-1):
-		if function(c)*function(a)>0:
-			a = c
-		else:
-			b = c
-		c = (a+b)/2.0
-	return c
+    for i in range(iterations-1):
+        if function(c)*function(a)>0:
+            a = c
+        else:
+            b = c
+        c = (a+b)/2.0
+    return c
 
 def num_linear(function, a, b, iterations):
-	iterations  = int(math.sqrt(iterations**2))
-	if a>b:
-		a, b = b, a
+    iterations  = int(math.sqrt(iterations**2))
+    if a>b:
+        a, b = b, a
 
-	for i in range(iterations):
-		fa = function(a)
-		fb = function(b)
-		c =  a - (b-a)/(fb/fa -1)
-		new = function(c)
+    for i in range(iterations):
+        fa = function(a)
+        fb = function(b)
+        c =  a - (b-a)/(fb/fa -1)
+        new = function(c)
 
-		if new == 0:
-			return c
-		elif new*function(a)>0:
-			a = c
-		else:
-			b = c
-	return c
+        if new == 0:
+            return c
+        elif new*function(a)>0:
+            a = c
+        else:
+            b = c
+    return c
 
 def num_newton(function, derivative, guess, iterations):
-	"""Newton-Raphson numerical method
+    """Newton-Raphson numerical method.
 
-	Return root of function using it's first derivative with initial guess, over given iterations"""
+    Return root of function using it's first derivative with initial guess, over given iterations."""
 
-	c = guess
-	for i in range(iterations):
-		fc = function(c)
-		if fc ==0:
-			return c
-		c -= fc/derivative(c)
-	return c
+    c = guess
+    for i in range(iterations):
+        fc = function(c)
+        if fc ==0:
+            return c
+        c -= fc/derivative(c)
+    return c
 
-def num_secant(function, guess1, guess2, iterations):
-	"""Secant numerical method
+def num_secant(function, guess1, guess2, iterations, tol = 0.000001):
+    """Secant numerical method.
 
-	Return root of function with initial guess1 and guess2, over given iterations"""
+    Return root of function with initial guess1 and guess2, over given iterations."""
 
-	for i in range(iterations):
-		f1 = function(guess1)
-		f2 = function(guess2)
-		if f1 ==0:
-			return guess1
-		if f2 ==0:
-			return guess2
+    for i in range(iterations):
+        print guess1
+        f1 = function(guess1)
+        f2 = function(guess2)
 
-		c = guess1 - f1*(guess1-guess2)/(f1-f2)
-		guess2 = guess1
-		guess1 = c
-	return guess1
+        if f1 ==0 or -tol <= guess1 - guess2 <= tol:
+            return guess1
+        elif f2 ==0:
+            return guess2
+        # elif f1 == f2:
+        #     return None
+
+        c = guess1 - f1*(guess1-guess2)/(f1-f2)
+        guess2 = guess1
+        guess1 = c
+    return guess1
