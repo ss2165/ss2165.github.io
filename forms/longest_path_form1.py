@@ -39,7 +39,7 @@ class Form1(Form1Template):
         self.mouse.y = (self.ch-y)/self.xu
 
         #arrow detect
-        if (0.9*self.arrow_scale*self.ball.vel + self.ball.pos - self.mouse).mag()<= self.ball.radius/3:
+        if (0.9*self.arrow_scale*self.ball.vel + self.ball.pos - self.mouse).mag()<= self.ball.radius/3 and self.reset:
             self.mousedown= True
 
     def btn_path_click (self, **event_args):
