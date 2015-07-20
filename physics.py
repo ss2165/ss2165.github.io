@@ -81,17 +81,41 @@ class vector3():
     def __add__(self, other):
         return vector3(self.x+other.x, self.y+other.y, self.z+other.z)
 
+    def __iadd__(self, other):
+        self.x += other.x
+        self.y += other.y
+        self.z += other.z
+        return self
+
     def __sub__(self, other):
         return vector3(self.x-other.x, self.y-other.y, self.z-other.z)
 
+    def __isub__(self, other):
+        self.x -= other.x
+        self.y -= other.y
+        self.z -= other.z
+        return self
+
     def __mul__(self, other):
         return vector3(other*self.x, other*self.y, other*self.z)
+
+    def __imul__(self, other):
+        self.x *= other
+        self.y *= other
+        self.z *= other
+        return self
 
     def __rmul__(self, other):
         return vector3(other*self.x, other*self.y, other*self.z)
 
     def __div__(self, other):
         return vector3(self.x/other, self.y/other, self.z/other)
+
+    def __idiv__(self, other):
+        self.x /= other
+        self.y /= other
+        self.z /= other
+        return self
 
     def dot(self, other):
         #dots vector self and other
