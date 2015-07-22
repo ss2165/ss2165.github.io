@@ -1,5 +1,15 @@
 import math
 
+class slider():
+    def __init__(self, min, max, steps):
+        pass
+    def draw(self, canvas):
+        pass
+    def value(self):
+        pass
+
+
+
 def eq_triangle(canvas, side, x= 0, y= 0):
     #draws upward equilateral triangle with bottom left corner at origin
     canvas.translate(x,y)
@@ -55,11 +65,49 @@ def dashed_line(canvas, dashlength, x2, y2, x=0, y= 0):
         factor = 0.8
 
         canvas.move_to(x,y)
+
         for i in range(no):
             canvas.line_to(x+(i+factor)*dx, y+(i+factor)*dy)
             canvas.move_to(x + (i+1)*dx, y + (i+1)*dy)
     else:
         pass
+
+def paths(canvas, paths, thickness, colour):
+    canvas.begin_path()
+    for path in paths:
+        if len(path)>2:
+            for i in range(len(path)-1):
+                canvas.move_to(path[i].x, path[i].y)
+                diff = path[i+1] - path[i]
+                new  = path[i] + diff*0.8
+                canvas.line_to(new.x, new.y)
+
+    canvas.line_width = thickness
+    canvas.stroke_style = colour
+    canvas.stroke()
+
+def vel_arrows(canvas, ball, line_width, arrow_scale = 0.15):
+    #x component
+    arrow(canvas, ball.vel.x*arrow_scale, 2*line_width, ball.pos.x, ball.pos.y)
+    canvas.fill_style = "#333333"
+    canvas.fill()
+
+    #y component
+    canvas.translate(ball.pos.x, ball.pos.y)
+    canvas.rotate(math.pi/2)
+    arrow(canvas, ball.vel.y*arrow_scale, 2*line_width)
+    canvas.fill()
+    canvas.rotate(-math.pi/2)
+
+    #velocity vector
+
+    if ball.vel.y>0:
+        canvas.rotate(ball.vel.phi())
+    else:
+        canvas.rotate(-ball.vel.phi())
+    arrow(canvas, ball.vel.mag()*arrow_scale, 4*line_width)
+    canvas.fill_style = "#49902a"
+    canvas.fill()
 
 def btn_run_click(self):
     #standard switching run button
@@ -87,3 +135,10 @@ def reset2(canvas, xu):
 def clear_canvas(canvas, colour):
     canvas.fill_style= colour
     canvas.fill_rect(0, 0, canvas.get_width(), canvas.get_height())
+
+def border(canvas, thickness, colour, xu):
+    canvas.begin_path()
+    canvas.stroke_rect(0, 0, canvas.get_width()/xu, canvas.get_height()/xu)
+    canvas.line_width = thickness
+    canvas.stroke_style = colour
+    canvas.stroke()

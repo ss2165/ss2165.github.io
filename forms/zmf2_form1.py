@@ -275,12 +275,7 @@ class Form1(Form1Template):
           self.collides.append(1.0*ball_1.pos)
           self.collides.append(1.0*ball_2.pos)
           self.collided = True
-          #fill final velocities in to boxes after collision
-        #   if lab:
-        #       self.txt_xsp_1.text = str(ball_1.vel.x)
-        #       self.txt_ysp_1.text = str(ball_1.vel.y)
-        #       self.txt_xsp_2.text = str(ball_2.vel.x)
-        #       self.txt_ysp_2.text = str(ball_2.vel.y)
+
 
   def radcalc(self, mass_l, mass_s, bigrad):
     #calculates radius of smaller ball

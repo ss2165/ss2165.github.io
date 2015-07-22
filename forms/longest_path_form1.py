@@ -148,18 +148,8 @@ class Form1(Form1Template):
             draw.reset2(canvas, xu)
 
         #dashes
-        canvas.begin_path()
         if not self.running:
-            for path in self.paths:
-                if len(path)>2:
-                    for i in range(len(path)-1):
-                        canvas.move_to(path[i].x, path[i].y)
-                        diff = path[i+1] - path[i]
-                        new  = path[i] + diff*0.8
-                        canvas.line_to(new.x, new.y)
-
-            canvas.line_width = 0.01
-            canvas.stroke()
+            draw.paths(canvas,self.paths, self.linewidth, "#000")
     def init_ball(self):
         xsp = 0
         ysp = 0
@@ -204,6 +194,4 @@ class Form1(Form1Template):
         self.v = 0
 
         #APPEND ALL PARAMETER BOXES
-        self.param_boxes= []
-        self.param_boxes.append(self.txt_v)
-        self.param_boxes.append(self.txt_ang)
+        self.param_boxes= [self.txt_v, self.txt_ang]

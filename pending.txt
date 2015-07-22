@@ -1,0 +1,26 @@
+General:
+  presets
+  more guiding text
+  canvas.draw_image?
+
+
+E and B:
+   Issues:
+       border resizing
+       too much path
+    Features:
+        Slider
+        Cartesian arrows for E&B
+        velocity arrow
+        Sanitize input
+
+
+Collider:
+    Issues:
+        Easier to grab arrow
+
+
+replace with:
+  border function
+  velocity arrow
+  path drawer 
