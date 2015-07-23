@@ -9,8 +9,8 @@ class Form1(Form1Template):
     me = 9.11e-31
     mp = 1.67e-27
     v = 2.3e7
-    line_width = 0.03
-    arrow_scale = 1e-7
+    line_width = 0.02
+    arrow_scale = 0.5e-7
 
     def txt_zoom_change (self, **event_args):
         # This method is called when the text in this text box is edited
@@ -31,10 +31,19 @@ class Form1(Form1Template):
         if self.mousedown:
             self.ball.pos += self.mouse - self.ball.pos
 
+        if self.arrowdown:
+            newvel = (self.mouse - self.ball.pos)/self.arrow_scale
+            self.txt_xsp.text = "{:.3g}".format(newvel.x)
+            self.txt_ysp.text = "{:.3g}".format(newvel.y)
+
+            self.ball.vel.x = float(self.txt_xsp.text)
+            self.ball.vel.y = float(self.txt_ysp.text)
+
 
     def canvas_mouse_up (self, x, y, button, **event_args):
     # This method is called when a mouse button is released on this component
         self.mousedown = False
+        self.arrowdown = False
 
     def canvas_mouse_down (self, x, y, button, **event_args):
         # This method is called when a mouse button is pressed on this component
@@ -43,6 +52,9 @@ class Form1(Form1Template):
         #if mouse is within a ball, record it
         if (self.ball.pos - self.mouse).mag() <=self.ball.radius and self.reset:
             self.mousedown= True
+
+        if (self.mouse - self.ball.pos - 0.9*self.arrow_scale*self.ball.vel).mag()<= self.ball.radius and self.reset:
+            self.arrowdown = True
         #arrow detect
         # for i in range(2):
         #    if (0.9*self.arrow_scale*self.balls[i].vel + self.balls[i].pos - self.mouse).mag()<= self.bigrad/3 and self.check_vel.checked:
@@ -137,7 +149,7 @@ class Form1(Form1Template):
             self.btn_run.text = "Run"
         else:
             draw.circle(canvas, drawrad, ball.pos.x, ball.pos.y)
-        canvas.fill_style = "rgb(32, 226, 252)"
+        canvas.fill_style = "rgb(30, 96, 139)"
         canvas.fill()
 
         #paths
@@ -147,8 +159,6 @@ class Form1(Form1Template):
         #arrows
         if not self.running:
             draw.vel_arrows(canvas, self.ball, self.line_width, self.arrow_scale)
-
-
             draw.reset2(canvas, xu)
 
 
@@ -212,6 +222,7 @@ class Form1(Form1Template):
         self.paths = []
         self.cur_path = []
         self.mousedown = False
+        self.arrowdown = False
         self.mouse = physics.vector3(0,0)
 
         electron = physics.ball(self.me, self.radius)
@@ -229,6 +240,8 @@ class Form1(Form1Template):
         self.particle_options = [electron, positron, alpha]
         self.buttons = []
 
+
+
         for index, particle in enumerate(self.particle_options):
             button = RadioButton(text= particle.name, value = index, group_name = "radio_particles")
             self.buttons.append(button)
@@ -240,4 +253,4 @@ class Form1(Form1Template):
         self.grid_particles.add_component(self.custom, row ="A", col_xs = 2*len(self.particle_options) + 1, width_xs =2)
         self.buttons.append(self.custom)
 
-        self.param_boxes = self.buttons + self.grid_custom.get_components() + self.grid_fields.get_components()
+        self.param_boxes = self.buttons + self.grid_custom.get_components() + self.grid_fields.get_components() + self.grid_vel.get_components()

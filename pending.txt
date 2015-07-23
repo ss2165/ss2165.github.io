@@ -2,16 +2,19 @@ General:
   presets
   more guiding text
   canvas.draw_image?
+  COMMENT EVERYTHING
+  DOCUMENT EVERYTHING
 
 
 E and B:
    Issues:
-       border resizing
+       #border resizing
        too much path
     Features:
-        Slider
+        /Slider
+        /velocity arrow
         Cartesian arrows for E&B
-        velocity arrow
+
         Sanitize input
 
 
@@ -23,4 +26,27 @@ Collider:
 replace with:
   border function
   velocity arrow
-  path drawer 
+  path drawer
+
+
+Maths:
+  integrator
+  line integrator
+  Dimensionality checker?
+
+
+
+QUESTIONS:
+  Install modules/ libraries (numpy)?
+2 whitespace indentation?
+ Troublesome drag and drop
+
+remove banner?
+render latex/units/powers?
+string check for chems
+integrate chem drawer
+Safari simulation
+pressed_enter for TextArea?
+linking methods to code added components?
+
+measure_text, unclear returns dict

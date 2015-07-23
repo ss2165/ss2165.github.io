@@ -1,12 +1,137 @@
 import math
 
 class slider():
-    def __init__(self, min, max, steps):
-        pass
-    def draw(self, canvas):
-        pass
-    def value(self):
-        pass
+    """Canvas slider object
+
+    Create a slider between mini and maxi with indicator of given colour which can take values in steps of stepsize.
+    The starting position is given by start.
+    Current value is given in the value attribute.
+
+    *Code template*
+    Mouse canvas links:
+        def [canvas_name]_mouse_move (self, x, y, **event_args):
+            self.[slider_name].mouse_move(x, y)
+            self.txt_1.text = "{0}".format(int(self.[slider_name].value))
+        def [canvas_name]_mouse_up (self, x, y, button, **event_args):
+            self.[slider_name].mouse_up(x, y)
+        def [canvas_name]_mouse_down (self, x, y, button, **event_args):
+            self.[slider_name].mouse_down(x, y)
+    """
+
+    default_colour = "#318fdb"
+    def __init__(self, canvas, mini, maxi, stepsize, start = 0, colour = default_colour):
+        self.mini = mini
+        self.maxi = maxi
+        self.stepsize = stepsize
+        self.canvas = canvas
+
+        self.cw = canvas.get_width()
+        self.ch = canvas.get_height()
+
+        self.range = maxi - mini
+        self.scale = float(self.cw) / self.range
+
+        self.value = start
+
+        self.mousedown = False
+
+        self.base_colour = colour
+        self.colour = colour
+
+        self.indicator  = False
+        self.maxmin = False
+
+        self.grabber_side =15
+
+    def draw(self):
+        canvas = self.canvas
+        scale = self.scale
+        reset2(self.canvas, 1)
+        clear_canvas(canvas, "#fff")
+        "#3248091"
+        #line
+        canvas.begin_path()
+        canvas.move_to(0, self.ch/(2))
+        canvas.line_width = 4
+        canvas.line_cap = "round"
+        canvas.line_to(self.cw, self.ch/(2))
+        canvas.shadow_blur = 0
+        canvas.stroke_style = "#404040"
+        canvas.stroke()
+
+        #grabber
+
+        grabber_side = self.grabber_side
+        triangle_centre = self.ch/2 - grabber_side*(1+1/math.sqrt(3))/2
+        polygon(canvas, 3, grabber_side, (self.value - self.mini)*self.scale, triangle_centre)
+        canvas.fill_style = self.colour
+        canvas.fill()
+        reset2(self.canvas, 1)
+        polygon(canvas, 4, grabber_side, (self.value - self.mini)*self.scale, self.ch/(2))
+        canvas.shadow_blur = 2 if self.mousedown else 5
+        canvas.shadow_color = "black"
+        canvas.fill_style = self.colour
+        canvas.fill()
+        reset2(self.canvas, 1)
+
+        #indicator
+        if self.indicator:
+            value_str = "{0}".format(repr(self.value))
+            font_size = 14
+            canvas.font = "{0}px sans-serif".format(font_size)
+            text_width = canvas.measure_text(value_str)['width']
+
+            canvas.fill_style = "#000"
+            canvas.shadow_blur = 0
+            height_offset = self.grabber_side*0.5*(1+math.sqrt(3)) + 1.1*font_size
+            canvas.translate((self.value - self.mini)*self.scale - text_width/2, self.ch/2 - height_offset)
+            canvas.scale(1, -1)
+            canvas.fill_text(value_str, 0, 0)
+            reset2(canvas, 1)
+
+        #maxmin labels
+        if self.maxmin:
+            mini_str = "{}".format(repr(self.mini))
+            maxi_str = "{}".format(repr(self.maxi))
+
+            font_size = 14
+            canvas.font = "{0}px sans-serif".format(font_size)
+
+            canvas.fill_style = "#000"
+            canvas.shadow_blur = 0
+            height_offset = self.grabber_side*0.5*(1+math.sqrt(3)) + 1.1*font_size
+            canvas.translate(0, self.ch/2 - height_offset)
+            canvas.scale(1, -1)
+            canvas.fill_text(mini_str, 0, 0)
+            reset2(canvas, 1)
+
+            canvas.translate(self.cw - canvas.measure_text(maxi_str)['width'], self.ch/2 - height_offset)
+            canvas.scale(1, -1)
+            canvas.fill_text(maxi_str, 0, 0)
+            reset2(canvas, 1)
+
+
+    def mouse_down(self, x, y):
+        self.mousedown = True
+        self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
+        self.draw()
+
+    def mouse_move(self, x, y):
+        xcheck = abs(x - (self.value - self.mini)*self.scale) <= self.grabber_side
+        ycheck = abs(y-self.ch/2)<=self.grabber_side/2
+        if xcheck and ycheck:
+            self.colour = "#{0:x}".format(int(self.base_colour[1:], 16)+0x202020)
+        else:
+            self.colour = self.base_colour
+
+        if self.mousedown:
+            self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
+
+        self.draw()
+
+    def mouse_up(self, x, y):
+        self.mousedown = False
+        self.draw()
 
 
 
