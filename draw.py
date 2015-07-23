@@ -6,6 +6,8 @@ class slider():
     Create a slider between mini and maxi with indicator of given colour which can take values in steps of stepsize.
     The starting position is given by start.
     Current value is given in the value attribute.
+    Default colour is blue. Optional colour must be given in hex string form.
+    Minimum canvas height 40px for standard, 50px with indicators.
 
     *Code template*
     Mouse canvas links:
@@ -42,19 +44,24 @@ class slider():
         self.maxmin = False
 
         self.grabber_side =15
+        self.enabled = True
 
     def draw(self):
         canvas = self.canvas
+        self.cw = canvas.get_width()
+        self.ch = canvas.get_height()
+        self.scale = float(self.cw) / self.range
         scale = self.scale
         reset2(self.canvas, 1)
         clear_canvas(canvas, "#fff")
-        "#3248091"
+        self.centre = self.ch - self.grabber_side/2 -5
+        centre = self.centre
         #line
         canvas.begin_path()
-        canvas.move_to(0, self.ch/(2))
+        canvas.move_to(0, centre)
         canvas.line_width = 4
         canvas.line_cap = "round"
-        canvas.line_to(self.cw, self.ch/(2))
+        canvas.line_to(self.cw, centre)
         canvas.shadow_blur = 0
         canvas.stroke_style = "#404040"
         canvas.stroke()
@@ -62,12 +69,12 @@ class slider():
         #grabber
 
         grabber_side = self.grabber_side
-        triangle_centre = self.ch/2 - grabber_side*(1+1/math.sqrt(3))/2
+        triangle_centre = centre - grabber_side*(1+1/math.sqrt(3))/2
         polygon(canvas, 3, grabber_side, (self.value - self.mini)*self.scale, triangle_centre)
         canvas.fill_style = self.colour
         canvas.fill()
         reset2(self.canvas, 1)
-        polygon(canvas, 4, grabber_side, (self.value - self.mini)*self.scale, self.ch/(2))
+        polygon(canvas, 4, grabber_side, (self.value - self.mini)*self.scale, centre)
         canvas.shadow_blur = 2 if self.mousedown else 5
         canvas.shadow_color = "black"
         canvas.fill_style = self.colour
@@ -84,7 +91,7 @@ class slider():
             canvas.fill_style = "#000"
             canvas.shadow_blur = 0
             height_offset = self.grabber_side*0.5*(1+math.sqrt(3)) + 1.1*font_size
-            canvas.translate((self.value - self.mini)*self.scale - text_width/2, self.ch/2 - height_offset)
+            canvas.translate((self.value - self.mini)*self.scale - text_width/2, centre - height_offset)
             canvas.scale(1, -1)
             canvas.fill_text(value_str, 0, 0)
             reset2(canvas, 1)
@@ -97,37 +104,41 @@ class slider():
             font_size = 14
             canvas.font = "{0}px sans-serif".format(font_size)
 
+
             canvas.fill_style = "#000"
             canvas.shadow_blur = 0
             height_offset = self.grabber_side*0.5*(1+math.sqrt(3)) + 1.1*font_size
-            canvas.translate(0, self.ch/2 - height_offset)
+            canvas.translate(0, centre - height_offset)
             canvas.scale(1, -1)
             canvas.fill_text(mini_str, 0, 0)
             reset2(canvas, 1)
 
-            canvas.translate(self.cw - canvas.measure_text(maxi_str)['width'], self.ch/2 - height_offset)
+            canvas.translate(self.cw - canvas.measure_text(maxi_str)['width'], centre - height_offset)
             canvas.scale(1, -1)
             canvas.fill_text(maxi_str, 0, 0)
             reset2(canvas, 1)
 
 
     def mouse_down(self, x, y):
-        self.mousedown = True
-        self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
-        self.draw()
+        if self.enabled:
+            self.mousedown = True
+            self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
+            self.draw()
 
     def mouse_move(self, x, y):
-        xcheck = abs(x - (self.value - self.mini)*self.scale) <= self.grabber_side
-        ycheck = abs(y-self.ch/2)<=self.grabber_side/2
-        if xcheck and ycheck:
-            self.colour = "#{0:x}".format(int(self.base_colour[1:], 16)+0x202020)
-        else:
-            self.colour = self.base_colour
+        y=self.ch-y
+        if self.enabled:
+            xcheck = abs(x - (self.value - self.mini)*self.scale) <= self.grabber_side
+            ycheck = abs(self.centre - y)<=self.grabber_side
+            if xcheck and ycheck:
+                self.colour = "#{0:x}".format(int(self.base_colour[1:], 16)+0x202020)
+            else:
+                self.colour = self.base_colour
 
-        if self.mousedown:
-            self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
+            if self.mousedown:
+                self.value = int((x /self.scale + self.mini)/self.stepsize)*self.stepsize
 
-        self.draw()
+            self.draw()
 
     def mouse_up(self, x, y):
         self.mousedown = False
@@ -184,8 +195,8 @@ def dashed_line(canvas, dashlength, x2, y2, x=0, y= 0):
     length = math.sqrt((x2-x)**2 + (y2-y)**2)
     no = int(length/dashlength)
     if no>0:
-        dx= (x2-x)/no
-        dy = (y2-y)/no
+        dx= float(x2-x)/no
+        dy = float(y2-y)/no
 
         factor = 0.8
 
@@ -234,6 +245,50 @@ def vel_arrows(canvas, ball, line_width, arrow_scale = 0.15):
     canvas.fill_style = "#49902a"
     canvas.fill()
 
+
+def cart_arrows(canvas, vector, line_width, arrow_scale = 0.15, colours = {'x':"#444242",'y':"#444242",'z':"#444242"}, x= 0, y=0 ):
+    #z component
+    canvas.shadow_blur = 4
+    canvas.translate(x, y)
+    canvas.rotate(math.pi/6)
+    canvas.scale(10*line_width, 10*line_width)
+    canvas.begin_path()
+    dashed_line(canvas, 0.2, 1,0)
+    canvas.line_width = 0.06
+    canvas.stroke()
+    canvas.scale(0.1/line_width, 0.1/line_width)
+    arrow(canvas, vector.z*arrow_scale, 1.5*line_width)
+    canvas.fill_style = colours['z']
+    canvas.fill()
+    canvas.rotate(-math.pi/6)
+
+    #x component
+    canvas.scale(10*line_width, 10*line_width)
+    canvas.begin_path()
+    dashed_line(canvas, 0.2,1.0 ,0)
+    canvas.stroke()
+    canvas.scale(0.1/line_width, 0.1/line_width)
+    arrow(canvas, vector.x*arrow_scale, 2*line_width)
+    canvas.fill_style = colours['x']
+    canvas.fill()
+
+    #y component
+    canvas.translate(line_width,0)
+    canvas.rotate(math.pi/2)
+    canvas.scale(10*line_width, 10*line_width)
+    canvas.begin_path()
+    dashed_line(canvas, 0.2,1.0 ,0)
+    canvas.stroke()
+    canvas.scale(0.1/line_width, 0.1/line_width)
+    arrow(canvas, vector.y*arrow_scale, 2*line_width)
+    canvas.fill_style = colours['y']
+    canvas.fill()
+    canvas.rotate(-math.pi/2)
+    canvas.translate(-line_width,0)
+
+    canvas.translate(-x,-y)
+
+
 def btn_run_click(self):
     #standard switching run button
     if not self.running:
@@ -263,7 +318,6 @@ def clear_canvas(canvas, colour):
 
 def border(canvas, thickness, colour, xu):
     canvas.begin_path()
-    canvas.stroke_rect(0, 0, canvas.get_width()/xu, canvas.get_height()/xu)
-    canvas.line_width = thickness
+    canvas.line_width = thickness/xu
     canvas.stroke_style = colour
-    canvas.stroke()
+    canvas.stroke_rect(0, 0, canvas.get_width()/xu, canvas.get_height()/xu)

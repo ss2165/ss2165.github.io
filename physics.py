@@ -1,5 +1,7 @@
 import math
 
+
+
 class ball():
     """3d spherical ball object, with mass, position vector, velocity vector and radius"""
 

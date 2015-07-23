@@ -12,14 +12,37 @@ class Form1(Form1Template):
     line_width = 0.02
     arrow_scale = 0.5e-7
 
-    def txt_zoom_change (self, **event_args):
-        # This method is called when the text in this text box is edited
-        if self.reset:
-            scale = float(self.txt_zoom.text)
-            if 0.1<=scale<=4 :
-                self.oldxu  = 1.0*self.xu
-                self.newxu = self.cw/10.0*scale
-                self.zoom = True
+    def txt_change (self, **event_args):
+        Ex  = self.txt_E_x.text
+        Ey  = self.txt_E_y.text
+        Ez  = self.txt_E_z.text
+        Bx  = self.txt_B_x.text
+        By  = self.txt_B_y.text
+        Bz  = self.txt_B_z.text
+        if len(Ex)>0 and len(Ey)>0 and len(Ez)>0:
+            self.E = physics.vector3(float(self.txt_E_x.text),float(self.txt_E_y.text), float(self.txt_E_z.text))
+        if len(Bx)>0 and len(By)>0 and len(Ez)>0:    
+            self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
+
+    def can_slid_mouse_move (self, x, y, **event_args):
+        self.slider1.mouse_move(x, y)
+        if self.reset and self.slider1.mousedown:
+            scale = self.slider1.value
+            self.oldxu  = 1.0*self.xu
+            self.newxu = self.cw/10.0*scale
+            self.zoom = True
+
+    def can_slid_mouse_up (self, x, y, button, **event_args):
+        self.slider1.mouse_up(x, y)
+    def can_slid_mouse_down (self, x, y, button, **event_args):
+        self.slider1.mouse_down(x, y)
+        if self.reset and self.slider1.mousedown:
+            scale = self.slider1.value
+            self.oldxu  = 1.0*self.xu
+            self.newxu = self.cw/10.0*scale
+            self.zoom = True
+
+
 
     def canvas_mouse_move (self, x, y, **event_args):
         # This method is called when the mouse cursor moves over this component
@@ -53,12 +76,8 @@ class Form1(Form1Template):
         if (self.ball.pos - self.mouse).mag() <=self.ball.radius and self.reset:
             self.mousedown= True
 
-        if (self.mouse - self.ball.pos - 0.9*self.arrow_scale*self.ball.vel).mag()<= self.ball.radius and self.reset:
+        if (self.mouse - self.ball.pos - 0.9*self.arrow_scale*self.ball.vel).mag()<= 0.2*(self.arrow_scale*self.ball.vel).mag() and self.reset:
             self.arrowdown = True
-        #arrow detect
-        # for i in range(2):
-        #    if (0.9*self.arrow_scale*self.balls[i].vel + self.balls[i].pos - self.mouse).mag()<= self.bigrad/3 and self.check_vel.checked:
-        #        self.mousedown[i+4] = True
 
     def timer_tick (self, **event_args):
         canvas = self.canvas
@@ -74,6 +93,10 @@ class Form1(Form1Template):
             self.xu = cw/10.0
             self.initialize()
             self.init_pos()
+            self.slider1 = draw.slider(self.can_slid, mini= 0.1, maxi = 4, stepsize = 0.1, start=1)
+            self.slider1.indicator = True
+            self.slider1.draw()
+            self.param_boxes.append(self.slider1)
             self.first = False
 
         ball = self.ball
@@ -153,7 +176,7 @@ class Form1(Form1Template):
         canvas.fill()
 
         #paths
-        if not self.running:
+        if not self.running and self.check_paths.checked:
             draw.paths(canvas,self.paths, self.line_width, "#000")
 
         #arrows
@@ -161,9 +184,20 @@ class Form1(Form1Template):
             draw.vel_arrows(canvas, self.ball, self.line_width, self.arrow_scale)
             draw.reset2(canvas, xu)
 
-
+        #field arrows
+        canvas.scale(1.0/self.xu, 1.0/self.xu)
+        draw.cart_arrows(canvas, self.E, 3, 100/((self.E.mag()+1)), x = 30, y = 50)
+        #draw.reset2(canvas, xu)
+        B2 = self.B*10e3
+        draw.cart_arrows(canvas, B2, 3, 100/((B2.mag()+1)), x = (self.cw - 80), y = 50)
+        #draw.reset2(canvas, xu)
+        canvas.scale(1,-1)
+        canvas.font= "20px sans-serif"
+        canvas.fill_text("E",50, -30 )
+        canvas.fill_text("B",(self.cw - 60), -30 )
+        canvas.scale(self.xu, -self.xu)
         #frame
-        draw.border(canvas,5/self.xu, "#000", xu)
+        draw.border(canvas,5, "#000", xu)
 
     def init_pos(self):
         self.ball.pos.x = self.canvas.get_width()/(2.0*self.xu)
@@ -228,14 +262,20 @@ class Form1(Form1Template):
         electron = physics.ball(self.me, self.radius)
         electron.charge  = -self.e
         electron.name = "Electron"
+        electron.E = physics.vector3(0, 1e3, 0)
+        electron.B = physics.vector3(0, 0, 5e-3)
 
         positron = physics.ball(self.me, self.radius)
         positron.charge = self.e
         positron.name = "Positron"
+        positron.E = physics.vector3(0, 1e3, 0)
+        positron.B = physics.vector3(0, 0, 5e-3)
 
         alpha = physics.ball(4*self.mp, self.radius)
         alpha.charge = 2*self.e
         alpha.name = "Alpha Particle"
+        alpha.E = physics.vector3(0, 1e5, 0)
+        alpha.B = physics.vector3(0, 0, 5e-1)
 
         self.particle_options = [electron, positron, alpha]
         self.buttons = []

@@ -8,31 +8,33 @@ General:
 
 E and B:
    Issues:
-       #border resizing
-       too much path
+       /border resizing
+       #too much path
     Features:
         /Slider
         /velocity arrow
-        Cartesian arrows for E&B
-
+        /Cartesian arrows for E&B
+        Find better place to put them
         Sanitize input
 
 
 Collider:
     Issues:
         Easier to grab arrow
+    Add zoom slider
 
 
 replace with:
   border function
   velocity arrow
   path drawer
+  zoom slider
 
 
 Maths:
   integrator
   line integrator
-  Dimensionality checker?
+  Dimensionality checker
 
 
 
