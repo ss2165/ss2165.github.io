@@ -22,21 +22,31 @@ class Form1(Form1Template):
     def can_slid_2_mouse_down (self, x, y, button, **event_args):
         self.slider2.mouse_down(x, y)
 
+    def can_slid_3_mouse_move (self, x, y, **event_args):
+        self.slider3.mouse_move(x, y)
+    def can_slid_3_mouse_up (self, x, y, button, **event_args):
+        self.slider3.mouse_up(x, y)
+    def can_slid_3_mouse_down (self, x, y, button, **event_args):
+        self.slider3.mouse_down(x, y)
+
     def timer_1_tick (self, **event_args):
         if self.first:
-            self.slider1 = draw.slider(self.can_slid, mini= 0, maxi = 100, stepsize = 1, start=4, colour = "#c17e27")
+            self.slider1 = draw.slider(self.can_slid, mini= 0, maxi = 100, stepsize = 1, start=4, colour = "#c13027")
             self.slider1.indicator = True
             self.slider1.draw()
             self.slider2 = draw.slider(self.can_slid_2, mini= -10, maxi = 10, stepsize = 0.1, start=0)
             self.slider2.maxmin =True
             self.slider2.draw()
+            self.slider3 = draw.slider(self.can_slid_3, mini= 0, maxi = 50, stepsize = 0.5, start=5, colour = "#33b138")
+            self.slider3.indicator = True
+            self.slider3.draw()
             self.first = False
 
 
     def txt_1_change (self, **event_args):
         if len(self.txt_1.text)>0:
-            self.slider.value = float(self.txt_1.text)
-            self.slider.draw()
+            self.slider1.value = float(self.txt_1.text)
+            self.slider1.draw()
     def __init__(self):
         # This sets up a variable for every component on this form.
         # For example, if we've drawn a button called "send_button", we can

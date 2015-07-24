@@ -9,6 +9,17 @@ class slider():
     Default colour is blue. Optional colour must be given in hex string form.
     Minimum canvas height 40px for standard, 50px with indicators.
 
+    Attributes:
+        mini --
+        maxi --
+        stepsize --
+        value --
+        mousedown --
+        indicator --
+        maxmin --
+        base_colour --
+        enabled --
+
     *Code template*
     Mouse canvas links:
         def [canvas_name]_mouse_move (self, x, y, **event_args):
@@ -56,6 +67,7 @@ class slider():
         clear_canvas(canvas, "#fff")
         self.centre = self.ch - self.grabber_side/2 -5
         centre = self.centre
+
         #line
         canvas.begin_path()
         canvas.move_to(0, centre)
@@ -67,7 +79,6 @@ class slider():
         canvas.stroke()
 
         #grabber
-
         grabber_side = self.grabber_side
         triangle_centre = centre - grabber_side*(1+1/math.sqrt(3))/2
         polygon(canvas, 3, grabber_side, (self.value - self.mini)*self.scale, triangle_centre)
@@ -103,7 +114,6 @@ class slider():
 
             font_size = 14
             canvas.font = "{0}px sans-serif".format(font_size)
-
 
             canvas.fill_style = "#000"
             canvas.shadow_blur = 0
@@ -143,8 +153,6 @@ class slider():
     def mouse_up(self, x, y):
         self.mousedown = False
         self.draw()
-
-
 
 def eq_triangle(canvas, side, x= 0, y= 0):
     #draws upward equilateral triangle with bottom left corner at origin
