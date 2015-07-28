@@ -5,6 +5,7 @@ import math
 import google.drive
 import re
 
+
 base_units =  ('s', 'a', 'cd', 'k', 'kg', 'm', 'mol')
 
 class quant():
@@ -16,16 +17,17 @@ class quant():
 
         for unit in base_units:
             if unit not in self.dict:
-                self.dict[unit] = 0
+                self.dict[unit] = 0.0
 
         self.aliases = []
         self.name = ""
         self.st = ""
 
     def __pow__(self, value):
+        newdict  = {}
         for unit in self.dict:
-            self.dict[unit] *= value
-        return self
+            newdict[unit] = self.dict[unit]*value
+        return quant(newdict)
 
     def __mul__(self, other):
         newdict  = {}
@@ -55,6 +57,28 @@ class quant():
 
 class Form1(Form1Template):
 
+    def btn_new_click (self, **event_args):
+        st = self.txt_1.text.replace(" ", "")
+        namee = self.txt_new.text
+        ans = self.check(st)
+        isin = False
+        for name, quantity in self.defs.items():
+            if quantity.dict == ans.dict:
+                isin = True
+
+
+        if not isin:
+            ans.name = namee
+            s= ans.dict['s']
+            a = ans.dict['a']
+            cd = ans.dict['cd']
+            k = ans.dict['k']
+            kg = ans.dict['kg']
+            m = ans.dict['m']
+            mol = ans.dict['mol']
+            row = self.data.add_row(name=namee, s= s, a= a, cd = cd, k =k, kg = kg, m = m, mol = mol)
+
+
     def button_1_click (self, **event_args):
         # self.lbl.text = ""
         # args = self.txt.text.split('*')
@@ -65,74 +89,64 @@ class Form1(Form1Template):
         #     if val != 0:
         #         self.lbl.text += " {0}: {1}".format(i, val)
 
+        self.lbl_match.visible = False
+        st = self.txt_1.text.replace(" ", "")
+        st2 =self.txt_2.text.replace(" ", "")
 
-        print self.check(self.txt.text.replace(" ", ""))
+        self.results = []
+        ans = self.check(st)
+        ans2 = self.check(st2)
+        ans.name = st
+        ans2.name = st2
+        for name, quantity in self.defs.items():
+            if quantity.dict == ans.dict:
+                ans.name = name
+            if quantity.dict == ans2.dict:
+                ans2.name = name
 
+        self.lbl_1.text = str(ans)
+        self.lbl_2.text = str(ans2)
+
+        if ans.dict == ans2.dict:
+            self.lbl_match.visible = True
 
 
     def check(self,st):
-        qs = []
-        if '(' in st:
-            a= re.findall('\([^(]*?\)', st)
-            for i in a:
+        ans = quant()
+        if '^' in st:
+            a = re.search('(\(?[^)^(]*?\)|\w+)?\^[\d\.-]*', st).group(0)
+            beg = st.find(a)
+            end = beg + len(a) -1
+            split = a.split('^')
+            dim = split[0]
+            power = float(split[1])
+            ans *= self.check(st[:beg])*(self.check(dim)**power)*self.check(st[end+1:])
 
-                beg= st.find(i)
-                end = beg + len(i) - 1
-                qs.append((self.check(i[1:-1]), beg, end))
-        elif '^' in st:
-            a = re.findall('\w*?\^\d+\.?\d*', st)
-            for i in a:
-                beg= st.find(i)
-                end = beg + len(i) - 1
-                split = i.split('^')
-                dim = split[0]
-                power = float(split[1])
-                qs.append((self.check(dim)[0][0]**power, beg, end))
+        elif '(' in st and ')' in st:
+            a= re.search('\([^(]*?\)', st).group(0)
+            beg = st.find(a)
+            end = beg + len(a) -1
+            ans *= self.check(st[:beg])*self.check(a[1:-1])*self.check(st[end+1:])
+
+        elif '/' in st:
+            st = st.replace("(", "")
+            st = st.replace(")", "")
+            a = re.search('\/[\w\d^.]*', st).group(0)
+            beg = st.find(a)
+            end = beg + len(a) -1
+            ans *= self.check(st[:beg])*self.check(st[end+1:-1])/self.check(a[1:])
+
+        elif '*' in st:
+            st = st.replace("(", "")
+            st = st.replace(")", "")
+            beg = st.find('*')
+            ans *= self.check(st[:beg])*self.check(st[beg+1:])
         else:
-            qs.append((self.defs[st], 0, len(st)-1))
-
-        return qs
-
-    def run(self,st):
-        st = st.replace(" ", "")
+            if st in self.defs:
+                ans = self.defs[st]**1
 
 
-        while '(' in st:
-            st = self.parcheck(st)
-
-
-    def mult(self, quant_list):
-        result = quant()
-        for quant in quant_list:
-            result *= quant
-        return result
-
-    def parcheck(self, st):
-        a= re.findall('\([^(]*?\)', st)
-
-        for i in a:
-
-            i2 = self.addcheck(i[1:-1])
-            st = st.replace (i , i2)
-        return st
-
-    def powcheck(self, st):
-        a = re.findall('\w*?\^\d+\.?\d*', st)
-
-        for i in a:
-            dim, power = i.split('^')
-
-
-    def addcheck(self, st):
-        a = re.split('\+|-', st)
-        terms = []
-        for i in a:
-            print i
-        return st
-
-    def muldiv(self, st):
-        pass
-
+        return ans
 
     def __init__(self):
 

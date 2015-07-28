@@ -6,6 +6,11 @@ General:
   DOCUMENT EVERYTHING
 
 
+draw
+    Make polygon/circle classes
+
+
+
 E and B:
    Issues:
        /border resizing
@@ -14,10 +19,13 @@ E and B:
         /Slider
         /velocity arrow
         /Cartesian arrows for E&B
-        Find better place to put them
+        Find better place to put them (cart arrows)
         Sanitize input
+        Bezier trails
 
 
+slider
+    Make form
 Collider:
     Issues:
         Easier to grab arrow
@@ -32,22 +40,22 @@ replace with:
 
 
 Maths:
-  integrator
+  RUNGE KUTTA
+integrator
   line integrator
   Dimensionality checker
 
 
 
 QUESTIONS:
-  Install modules/ libraries (numpy)?
-2 whitespace indentation?
- Troublesome drag and drop
+
+Troublesome drag and drop
 
 remove banner?
 render latex/units/powers?
 string check for chems
 integrate chem drawer
-Safari simulation
+
 pressed_enter for TextArea?
 linking methods to code added components?
 

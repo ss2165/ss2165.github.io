@@ -11,6 +11,7 @@ class Form1(Form1Template):
     v = 2.3e7
     line_width = 0.02
     arrow_scale = 0.5e-7
+    trail_buffer = 20
 
     def txt_change (self, **event_args):
         Ex  = self.txt_E_x.text
@@ -21,7 +22,7 @@ class Form1(Form1Template):
         Bz  = self.txt_B_z.text
         if len(Ex)>0 and len(Ey)>0 and len(Ez)>0:
             self.E = physics.vector3(float(self.txt_E_x.text),float(self.txt_E_y.text), float(self.txt_E_z.text))
-        if len(Bx)>0 and len(By)>0 and len(Ez)>0:    
+        if len(Bx)>0 and len(By)>0 and len(Ez)>0:
             self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
 
     def can_slid_mouse_move (self, x, y, **event_args):
@@ -107,6 +108,9 @@ class Form1(Form1Template):
             ball.move(dt)
             if int(self.t/self.dt) %6 ==0:
                 self.cur_path.append(self.ball.pos)
+            self.trail.append(self.ball.pos)
+            if len(self.trail)>self.trail_buffer:
+                self.trail = self.trail[1:]
             self.t += dt
 
         if self.zoom:
@@ -175,6 +179,14 @@ class Form1(Form1Template):
         canvas.fill_style = "rgb(30, 96, 139)"
         canvas.fill()
 
+        if self.running and self.check_trail.checked:
+            b = len(self.trail)
+            canvas.begin_path()
+            canvas.move_to(self.trail[0].x, self.trail[0].y)
+            canvas.quadratic_curve_to(self.trail[int(b/2)].x, self.trail[int(b/2)].y, self.trail[-1].x, self.trail[-1].y)
+            canvas.line_width = 0.03
+            canvas.stroke()
+
         #paths
         if not self.running and self.check_paths.checked:
             draw.paths(canvas,self.paths, self.line_width, "#000")
@@ -187,15 +199,15 @@ class Form1(Form1Template):
         #field arrows
         canvas.scale(1.0/self.xu, 1.0/self.xu)
         draw.cart_arrows(canvas, self.E, 3, 100/((self.E.mag()+1)), x = 30, y = 50)
-        #draw.reset2(canvas, xu)
         B2 = self.B*10e3
         draw.cart_arrows(canvas, B2, 3, 100/((B2.mag()+1)), x = (self.cw - 80), y = 50)
-        #draw.reset2(canvas, xu)
         canvas.scale(1,-1)
         canvas.font= "20px sans-serif"
         canvas.fill_text("E",50, -30 )
         canvas.fill_text("B",(self.cw - 60), -30 )
         canvas.scale(self.xu, -self.xu)
+
+
         #frame
         draw.border(canvas,5, "#000", xu)
 
@@ -233,7 +245,7 @@ class Form1(Form1Template):
         self.E = physics.vector3(float(self.txt_E_x.text),float(self.txt_E_y.text), float(self.txt_E_z.text))
         self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
 
-
+        self.trail = [self.ball.pos]
 
     def __init__(self):
         # This sets up a variable for every component on this form.
@@ -255,6 +267,7 @@ class Form1(Form1Template):
 
         self.paths = []
         self.cur_path = []
+        self.trail= []
         self.mousedown = False
         self.arrowdown = False
         self.mouse = physics.vector3(0,0)
