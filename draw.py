@@ -97,7 +97,7 @@ class slider():
             value_str = "{0}".format(repr(self.value))
             font_size = 14
             canvas.font = "{0}px sans-serif".format(font_size)
-            text_width = canvas.measure_text(value_str)['width']
+            text_width = canvas.measure_text(value_str)
 
             canvas.fill_style = "#000"
             canvas.shadow_blur = 0

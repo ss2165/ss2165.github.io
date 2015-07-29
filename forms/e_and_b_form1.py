@@ -80,6 +80,9 @@ class Form1(Form1Template):
         if (self.mouse - self.ball.pos - 0.9*self.arrow_scale*self.ball.vel).mag()<= 0.2*(self.arrow_scale*self.ball.vel).mag() and self.reset:
             self.arrowdown = True
 
+    def accel(self, t, y):
+        return (self.E + y.cross(self.B))*self.ball.charge/self.ball.mass
+
     def timer_tick (self, **event_args):
         canvas = self.canvas
         self.cw = canvas.get_width()
@@ -102,9 +105,11 @@ class Form1(Form1Template):
 
         ball = self.ball
         if self.running:
-            dtt = dt/30
-            for i in range(30):
-                ball.vel += dtt*(self.E + ball.vel.cross(self.B))*ball.charge/ball.mass
+            #dtt = dt/30
+            # for i in range(30):
+            #     ball.vel += dtt*(self.E + ball.vel.cross(self.B))*ball.charge/ball.mass
+            # ball.move(dt)
+            ball.vel = physics.runge_kutta4(ball.vel, self.accel, self.t, dt)
             ball.move(dt)
             if int(self.t/self.dt) %6 ==0:
                 self.cur_path.append(self.ball.pos)

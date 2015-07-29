@@ -130,6 +130,15 @@ class vector3():
     def __str__(self):
         return "({0.x}, {0.y}, {0.z})".format(self)
 
+def runge_kutta4(y, f, t, dt):
+    """Return next iteration of function y with derivative f with timestep dt using Runge-Kutta 4th order"""
+    k1 = f(t, y)
+    k2 = f(t + dt/2, y + k1*dt/2)
+    k3 = f(t + dt/2, y + k2*dt/2)
+    k4 = f(t + dt, y + dt*k3)
+    y = y + (dt/6)*(k1 + 2*k2 + 2*k3 + k4)
+    return y
+
 def num_bisection(function, a, b, iterations):
     iterations  = int(math.sqrt(iterations**2))
     if a>b:

@@ -8,6 +8,7 @@ General:
 
 draw
     Make polygon/circle classes
+    Assertions/exceptions
 
 
 
@@ -25,7 +26,12 @@ E and B:
 
 
 slider
-    Make form
+    /Make form
+dimensionality
+    exponents, cos, sin
+    duplicate search
+    filter
+
 Collider:
     Issues:
         Easier to grab arrow
@@ -41,7 +47,7 @@ replace with:
 
 Maths:
   RUNGE KUTTA
-integrator
+  integrator
   line integrator
   Dimensionality checker
 
