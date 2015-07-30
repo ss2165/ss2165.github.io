@@ -28,9 +28,10 @@ E and B:
 slider
     /Make form
 dimensionality
-    exponents, cos, sin
+    exponents, cos, sin, power terms, log
     duplicate search
     filter
+
 
 Collider:
     Issues:
@@ -51,7 +52,9 @@ Maths:
   line integrator
   Dimensionality checker
 
-
+Waves:
+ point source animations -https://en.wikipedia.org/wiki/Doppler_effect
+doppler/interference
 
 QUESTIONS:
 
