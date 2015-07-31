@@ -258,7 +258,7 @@ def cart_arrows(canvas, vector, line_width, arrow_scale = 0.15, colours = {'x':"
     #z component
     canvas.shadow_blur = 4
     canvas.translate(x, y)
-    canvas.rotate(math.pi/6)
+    canvas.rotate(math.pi/6 + math.pi)
     canvas.scale(10*line_width, 10*line_width)
     canvas.begin_path()
     dashed_line(canvas, 0.2, 1,0)
@@ -268,7 +268,7 @@ def cart_arrows(canvas, vector, line_width, arrow_scale = 0.15, colours = {'x':"
     arrow(canvas, vector.z*arrow_scale, 1.5*line_width)
     canvas.fill_style = colours['z']
     canvas.fill()
-    canvas.rotate(-math.pi/6)
+    canvas.rotate(-math.pi/6- math.pi)
 
     #x component
     canvas.scale(10*line_width, 10*line_width)

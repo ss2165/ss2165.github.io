@@ -2,6 +2,8 @@ import math
 
 
 
+
+
 class ball():
     """3d spherical ball object, with mass, position vector, velocity vector and radius"""
 
@@ -40,6 +42,35 @@ class ball():
 
     def collision_check(self, other):
         return ((self.pos - other.pos).mag() <= self.radius + other.radius)
+
+class point_source(ball):
+    c= 3e8
+
+    def __init__(self, speed = c, frequency = None, wavelength = None,radius = 0.1, x =0, y =0, xsp = 0, ysp = 0):
+        ball.__init__(self, mass=0.1,radius =radius, x =x, y =y, xsp =xsp, ysp =ysp)
+
+        if frequency !=None:
+            if wavelength !=None:
+                self.speed = frequency * wavelength
+                self.frequency = frequency
+                self.wavelength = wavelength
+            self.speed = speed
+            self.frequency = frequency
+            self.wavelength = speed/frequency
+        elif wavelength !=None:
+            self.speed = speed
+            self.wavelength = wavelength
+            self.frequency = speed/wavelength
+        else:
+            raise "Provide two out of three of speed, wavelength or frequency"
+
+        self.wavefront = 0
+        self.mousedown = False
+    def start(self):
+        pass
+    def radiate(self, dt):
+        self.wavefront += self.speed*dt
+
 
 class vector3():
     """3D vector object"""

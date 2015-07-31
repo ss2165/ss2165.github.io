@@ -13,6 +13,10 @@ class Form1(Form1Template):
     arrow_scale = 0.5e-7
     trail_buffer = 20
 
+    def check_paths_change (self, **event_args):
+        self.draw_all()
+    def check_trail_change (self, **event_args):
+        self.draw_all()
     def txt_change (self, **event_args):
         Ex  = self.txt_E_x.text
         Ey  = self.txt_E_y.text
@@ -24,6 +28,7 @@ class Form1(Form1Template):
             self.E = physics.vector3(float(self.txt_E_x.text),float(self.txt_E_y.text), float(self.txt_E_z.text))
         if len(Bx)>0 and len(By)>0 and len(Ez)>0:
             self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
+        self.draw_all()
 
     def can_slid_mouse_move (self, x, y, **event_args):
         self.slider1.mouse_move(x, y)
@@ -54,6 +59,7 @@ class Form1(Form1Template):
         #change text box value based on where mouse is
         if self.mousedown:
             self.ball.pos += self.mouse - self.ball.pos
+            self.draw_all()
 
         if self.arrowdown:
             newvel = (self.mouse - self.ball.pos)/self.arrow_scale
@@ -63,11 +69,12 @@ class Form1(Form1Template):
             self.ball.vel.x = float(self.txt_xsp.text)
             self.ball.vel.y = float(self.txt_ysp.text)
 
-
+            self.draw_all()
     def canvas_mouse_up (self, x, y, button, **event_args):
     # This method is called when a mouse button is released on this component
         self.mousedown = False
         self.arrowdown = False
+        self.draw_all()
 
     def canvas_mouse_down (self, x, y, button, **event_args):
         # This method is called when a mouse button is pressed on this component
@@ -76,9 +83,11 @@ class Form1(Form1Template):
         #if mouse is within a ball, record it
         if (self.ball.pos - self.mouse).mag() <=self.ball.radius and self.reset:
             self.mousedown= True
+            self.draw_all()
 
         if (self.mouse - self.ball.pos - 0.9*self.arrow_scale*self.ball.vel).mag()<= 0.2*(self.arrow_scale*self.ball.vel).mag() and self.reset:
             self.arrowdown = True
+            self.draw_all()
 
     def accel(self, t, y):
         return (self.E + y.cross(self.B))*self.ball.charge/self.ball.mass
@@ -102,6 +111,7 @@ class Form1(Form1Template):
             self.slider1.draw()
             self.param_boxes.append(self.slider1)
             self.first = False
+            self.draw_all()
 
         ball = self.ball
         if self.running:
@@ -117,6 +127,7 @@ class Form1(Form1Template):
             if len(self.trail)>self.trail_buffer:
                 self.trail = self.trail[1:]
             self.t += dt
+            self.draw_all()
 
         if self.zoom:
             self.xu += (self.newxu-self.oldxu)/20
@@ -124,7 +135,7 @@ class Form1(Form1Template):
             if -0.05 <=(self.xu - self.newxu) <= 0.05:
                 self.zoom = False
 
-        self.draw_all()
+            self.draw_all()
 
     def btn_path_click (self, **event_args):
         self.paths= []
@@ -251,6 +262,7 @@ class Form1(Form1Template):
         self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
 
         self.trail = [self.ball.pos]
+        self.draw_all()
 
     def __init__(self):
         # This sets up a variable for every component on this form.

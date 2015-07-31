@@ -112,16 +112,34 @@ class Form1(Form1Template):
     for box in self.param_boxes:
       box.enabled = self.reset
 
-  def txt_zoom_change (self, **event_args):
-    # This method is called when the text in this text box is edited
-    if self.reset:
-        scale = float(self.txt_zoom.text)
-        if 0.1<=scale<=4 :
-            self.oldxu  = 1.0*self.xu
-            self.newxu = self.cw/(self.bigrad*2*10)*scale
-            self.zoom = True
 
-        #self.init_balls_pos()
+  def can_slid_mouse_move (self, x, y, **event_args):
+    self.slider1.mouse_move(x, y)
+    if self.reset and self.slider1.mousedown:
+      scale = self.slider1.value
+      self.oldxu  = 1.0*self.xu
+      self.newxu = self.cw/(self.bigrad*2*10)*scale
+      self.zoom = True
+
+  def can_slid_mouse_up (self, x, y, button, **event_args):
+    self.slider1.mouse_up(x, y)
+  def can_slid_mouse_down (self, x, y, button, **event_args):
+    self.slider1.mouse_down(x, y)
+    if self.reset and self.slider1.mousedown:
+      scale = self.slider1.value
+      self.oldxu  = 1.0*self.xu
+      self.newxu = self.cw/(self.bigrad*2*10)*scale
+      self.zoom = True
+  # def txt_zoom_change (self, **event_args):
+  #   # This method is called when the text in this text box is edited
+  #   if self.reset:
+  #       scale = float(self.txt_zoom.text)
+  #       if 0.1<=scale<=4 :
+  #           self.oldxu  = 1.0*self.xu
+  #           self.newxu = self.cw/(self.bigrad*2*10)*scale
+  #           self.zoom = True
+  #
+  #       #self.init_balls_pos()
 
   def timer_1_tick (self, **event_args):
     # This method is called Every [interval] seconds
@@ -140,7 +158,10 @@ class Form1(Form1Template):
           x = physics.ball(1, self.bigrad)
           self.balls.append(x)
 
-      #self.init_balls(self.can_lab)
+      self.slider1 = draw.slider(self.can_slid, mini= 0.1, maxi = 4, stepsize = 0.1, start=1)
+      self.slider1.indicator = True
+      self.slider1.draw()
+      self.param_boxes.append(self.slider1)
       self.init_balls()
       self.init_balls_pos()
       self.first = False
