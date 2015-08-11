@@ -30,13 +30,15 @@ class quant():
         self.name = ""
 
     def find_name(self, dic):
-        """search dictionary for match and name self if found, then return name"""
+        """search dictionary for match and name self if found, then return formatted name"""
         for q in dic:
             if self.dict == dic[q].dict:
-                self.name = q
-                return q
+                name = q.replace("_", " ").title()
+                self.name = name
+                return name
         self.name = "[no name]"
         return self.name
+
     def __pow__(self, value):
         """raise dimensions to a power"""
         newdict  = {}
@@ -73,7 +75,8 @@ class quant():
     def __str__(self):
         """Return string of quantity as [name]: [base_units]"""
         out = self.name + ": "
-        for name, val in self.dict.items():
+        for name in base_units:
+            val = self.dict[name]
             #only include non zero powers
             if val !=0:
                 #capitalize amps and kelvin
@@ -102,36 +105,9 @@ class Form1(Form1Template):
 
     def txt_filter_change (self, **event_args):
         """Filter list of quantities by name, alias, keywords, return results"""
-        if self.txt_filter.text =="":
-            #no filter, show full table
-            self.fill_table()
 
-        else:
-            #fill titles on table
-            self.lst_quants.clear()
-            titles  = quant_entry("Name", ["Aliases"], {"Base Units":1})
-            titles.lbl_name.bold = True
-            titles.lbl_aliases.bold = True
-            titles.lbl_dict.bold = True
-            self.lst_quants.add_component(titles)
+        self.fill_table()
 
-            for key, q in sorted(self.defs.items()):
-                #check name, case insensitive
-                check_name = key.lower().find(self.txt_filter.text.lower()) != -1
-                #check aliases
-                if not check_name:
-                    for i in q.aliases:
-                        if not check_name:
-                            check_name =  i.lower().find(self.txt_filter.text.lower()) != -1
-                #check keywords
-                if not check_name:
-                    for i in q.keywords:
-                        if not check_name:
-                            check_name =  i.lower().find(self.txt_filter.text.lower()) != -1
-                #if found, fill entry
-                if check_name:
-                    entry  = quant_entry(q.name, q.aliases, q.dict)
-                    self.lst_quants.add_component(entry)
 
     def check_dev_change (self, **event_args):
         """Enable database entry form"""
@@ -172,23 +148,17 @@ class Form1(Form1Template):
     def button_1_click (self, **event_args):
         #clear error box
         self.lbl_terms.visible = False
-        self.lbl_match.visible = False
 
         #read in input string and remove whitespace
         st = self.txt_1.text.replace(" ", "")
-        st2 =self.txt_2.text.replace(" ", "")
 
         #check both strings
         ans = self.check(st)
-        ans2 = self.check(st2)
 
         #return values
         self.lbl_1.text = str(ans)
-        self.lbl_2.text = str(ans2)
 
-        #check for match
-        if ans.dict == ans2.dict:
-            self.lbl_match.visible = True
+
 
         #clear Output
         print "\n"*5
@@ -204,12 +174,30 @@ class Form1(Form1Template):
         titles.lbl_name.bold = True
         titles.lbl_aliases.bold = True
         titles.lbl_dict.bold = True
+        titles.btn.visible = False
         self.lst_quants.add_component(titles)
 
         #fill in quantities in alphabetical order
+        check_name = True
+        filt = self.txt_filter.text.replace(" ", "").lower()
         for key, q in sorted(self.defs.items()):
-            entry  = quant_entry(q.name, q.aliases, q.dict)
-            self.lst_quants.add_component(entry)
+            if filt != "":
+                #check name, case insensitive
+                check_name = key.lower().find(filt) != -1
+                #check aliases
+                if not check_name:
+                    for i in q.aliases:
+                        if not check_name:
+                            check_name =  i.lower().find(filt) != -1
+                #check keywords
+                if not check_name:
+                    for i in q.keywords:
+                        if not check_name:
+                            check_name =  i.lower().find(filt) != -1
+            #if found, fill entry
+            if check_name:
+                entry  = quant_entry(q.name, q.aliases, q.dict,self.txt_1)
+                self.lst_quants.add_component(entry)
 
     def update_defs(self):
         """Read in database of definitions and fill table with them"""
@@ -322,8 +310,10 @@ class Form1(Form1Template):
         #empty answer quant
         ans = quant()
 
+        a = st2.split('=')
         #Find terms split by +- terms or terms between opening and closing parantheses
-        a = re.findall(r'([^+-]*\(.*\)(\^\-?[\d.]*)?[\w/.*\^]*|[^+-]*\w+(\^\-?[\d.]*)?[\w/.*]*)', st2)
+        for  i in range(len(a)):
+            a = a[:i]+ re.findall(r'([^+-]*\(.*\)(\^\-?[\d.]*)?[\w/.*\^]*|[^+-]*\w+(\^\-?[\d.]*)?[\w/.*]*)', a[i])+ a[i+1:]
         #RegEx string: +- then parantheses followed by string(power/division/mult) or +- then non-parantheses terms
 
         #findall returns list of tuples, take only first value of tuple
@@ -389,7 +379,7 @@ class Form1(Form1Template):
 
                     #check for functions which should have dimensionless arguments
                     if prev in functions:
-                        if inside.name != "dimensionless":
+                        if inside.name.lower() != "dimensionless":
                             text = "ERROR: Expression inside " + prev + "() is not dimensionless\n"
                             try:
                                 text += a[1:-1] + " has dimensions of " + inside.name

@@ -139,6 +139,7 @@ class Form1(Form1Template):
 
     def btn_path_click (self, **event_args):
         self.paths= []
+        self.draw_all()
 
     def btn_run_click (self, **event_args):
         # This method is called when the button is clicked
@@ -161,6 +162,7 @@ class Form1(Form1Template):
         for box in self.param_boxes:
             box.enabled = self.reset
 
+        self.draw_all()
 
     def btn_reset_click (self, **event_args):
         # This method is called when the button is clicked
@@ -177,6 +179,8 @@ class Form1(Form1Template):
         self.initialize()
         self.init_pos()
 
+        self.draw_all()
+        
     def draw_all(self):
         canvas = self.canvas
         xu = self.xu
