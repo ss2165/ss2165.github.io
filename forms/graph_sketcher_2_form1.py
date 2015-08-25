@@ -29,9 +29,10 @@ class Form1(Form1Template):
 
         return (xnew, fxnew)
     def canvas_mouse_move (self, x, y, **event_args):
-        xy = self.find_xy(x, y)
+
 
         if self.mousedown:
+            xy = self.find_xy(x, y)
             self.newvalues.append(xy)
             self.canvas.line_to(x,y)
             self.canvas.stroke()
@@ -304,14 +305,18 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
+                y1 = values[i][1]
+                y2 = values[i+wid][1]
+                x1 = values[i][0]
+
                 testfx = False
-                if values[i][1] ==0:
+                if y1 ==0:
                     testfx = True
-                elif values[i+wid][1]*values[i][1] < 0:
+                elif y2*y1 < 0 and abs(y2 - y1) <= 100/self.graph.yu:
                     testfx = True
 
                 if testfx and len(inters) < 10:
-                    inters.append( values[i][0])
+                    inters.append( x1)
 
         return inters
 
@@ -320,14 +325,18 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
+                y1 = values[i][1]
+                x1 = values[i][0]
+                x2 = values[i+wid][0]
+
                 testx = False
-                if values[i][0] ==0:
+                if x1 ==0:
                     testx = True
-                elif values[i+wid][0]*values[i][0] < 0:
+                elif x2*x1 < 0 and abs(x2 - x1) <= 100/self.graph.xu:
                     testx = True
 
                 if testx  and len(inters) < 10:
-                    inters.append(values[i][1])
+                    inters.append(y1)
 
         return inters
 
@@ -336,7 +345,11 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid and i>wid:
-                test = (values[i+wid][1] - values[i][1])*(values[i][1] - values[i-wid][1]) <=0
+                y1 = values[i][1]
+                y2 = values[i+wid][1]
+                y_2 = values[i-wid][1]
+
+                test = (y2 - y1)*(y1 - y_2) <=0  and abs(y2 - y1) <= 100/self.graph.yu  and abs(y_2 - y1) <= 100/self.graph.yu
                 if test  and len(stats) < 10:
                     stats.append(values[i])
         return stats
