@@ -475,7 +475,10 @@ class Form1(Form1Template):
         x= self.xran[0] + step
         fx = self.correct_function(x)
         while self.values[-1][0] < self.xran[1]:
-            self.values.append((x, self.correct_function(x)))
+            try:
+                self.values.append((x, self.correct_function(x)))
+            except ZeroDivisionError:
+                pass
             x += step
 
     def timer_tick (self, **event_args):
