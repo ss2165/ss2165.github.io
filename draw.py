@@ -713,7 +713,7 @@ class graph_plot():
         else:
             return "%3.3e" % n
 
-    def circle_points(self, points, colour, pointlabels = None):
+    def circle_points(self, points, colour, pointlabels = None, pointoffset = 0):
         canvas = self.canvas
 
         self.transform()
@@ -732,7 +732,7 @@ class graph_plot():
             if pointlabels != None:
                 text = pointlabels[i]
             else:
-                text = chr(i+97)
+                text = chr(i+65 + pointoffset)
 
             canvas.fill_text(text, 15, 15)
             canvas.scale(self.xu, -self.yu)

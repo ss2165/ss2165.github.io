@@ -62,12 +62,13 @@ class Form1(Form1Template):
     def btn_clear_click (self, **event_args):
         draw.reset2(self.canvas, 1)
         draw.clear_canvas(self.canvas, "#fff")
-        self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
+        self.graph2.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
         self.newvalues = []
         self.all = []
         self.grid_stat.clear()
         self.grid_x_int.clear()
         self.grid_y_int.clear()
+        self.lbl_mark.text = ""
         self.lbl_mark.background = "#fff"
         self.started = False
 
@@ -110,17 +111,27 @@ class Form1(Form1Template):
         # teststats = self.find_stationary_2(self.newvalues)
 
         corrstats = self.find_stationary(self.values)
+
         teststats = self.find_stationary(self.newvalues)
 
 
 
         self.corr_x_ints = self.find_x_intersecs(self.values)
+
         self.corr_y_ints = self.find_y_intersecs(self.values)
         self.test_x_ints = self.find_x_intersecs(self.newvalues)
         self.test_y_ints = self.find_y_intersecs(self.newvalues)
 
         self.lbl_mark.text = ""
         numbers = True
+
+        print self.corr_x_ints
+        print "\n"*3
+        print self.corr_y_ints
+        print "\n"*3
+        print corrstats
+        print "\n"*3
+
 
         if len(corrstats) != len(teststats):
             self.lbl_mark.text += "Wrong number of stationary points"
@@ -137,10 +148,43 @@ class Form1(Form1Template):
             self.lbl_mark.background = "rgb(207, 84, 84)"
             numbers = False
 
+
+
+
         self.x_int_entries = []
         self.y_int_entries = []
         self.stat_entries = []
         if numbers:
+            xquads = False
+            yquads = False
+            statquads = False
+            for i in range(len(self.test_x_ints)):
+                test = self.test_x_ints[i]
+                corr = self.corr_x_ints[i]
+                if test*corr<=0:
+                    xquads = True
+
+            for i in range(len(self.test_y_ints)):
+                test = self.test_y_ints[i]
+                corr = self.corr_y_ints[i]
+                if test*corr<=0:
+                    yquads = True
+
+            for i in range(len(teststats)):
+                test = teststats[i]
+                corr = corrstats[i]
+
+                if test[0]*corr[0]<=0 or test[1]*corr[1]<=0:
+                    statquads = True
+
+            if xquads or yquads or statquads:
+                self.lbl_mark.background = "rgb(207, 84, 84)"
+                if xquads:
+                    self.lbl_mark.text += "\nWrong sign for x Intersection(s)"
+                if yquads:
+                    self.lbl_mark.text += "\nWrong sign for y Intersection(s)"
+                if statquads:
+                    self.lbl_mark.text += "\nStationary point(s) in wrong quadrant"
 
 
             if len(self.test_x_ints)>0:
@@ -148,9 +192,9 @@ class Form1(Form1Template):
                 self.grid_x_int.add_component(int_label)
 
                 for i in range(len(self.test_x_ints)):
-                    box = TextBox(placeholder = "{}".format(chr(i+97)))
+                    box = TextBox(placeholder = "{}".format(chr(i+65)))
                     self.x_int_entries.append(box)
-                    self.grid_x_int.add_component(box, row = chr(i+41))
+                    self.grid_x_int.add_component(box, row = chr(i+65))
 
 
             if len(self.test_y_ints)>0:
@@ -158,20 +202,20 @@ class Form1(Form1Template):
                 self.grid_y_int.add_component(int_label)
 
                 for i in range(len(self.test_y_ints)):
-                    box = TextBox(placeholder = "{}".format(chr(i+97)))
+                    box = TextBox(placeholder = "{}".format(chr(i+65 + len(self.test_x_ints))))
                     self.y_int_entries.append(box)
-                    self.grid_y_int.add_component(box, row = chr(i+41))
+                    self.grid_y_int.add_component(box, row = chr(i+65))
 
             if len(teststats)>0:
                 int_label = Label(text = "Stationary points", bold = True)
                 self.grid_stat.add_component(int_label)
 
                 for i in range(len(teststats)):
-                    box_x = TextBox(placeholder = "{}: x".format(chr(i+97)))
-                    box_y = TextBox(placeholder = "{}: y".format(chr(i+97)))
+                    box_x = TextBox(placeholder = "{}: x".format(chr(i+65 + len(self.test_x_ints) + len(self.test_y_ints))))
+                    box_y = TextBox(placeholder = "{}: y".format(chr(i+65+ len(self.test_x_ints) + len(self.test_y_ints))))
                     self.stat_entries.append((box_x, box_y))
-                    self.grid_stat.add_component(box_x, row = chr(i+41),  col_xs=0, width_xs=5)
-                    self.grid_stat.add_component(box_y,row = chr(i+41),  col_xs=6, width_xs=5)
+                    self.grid_stat.add_component(box_x, row = chr(i+65),  col_xs=0, width_xs=5)
+                    self.grid_stat.add_component(box_y,row = chr(i+65),  col_xs=6, width_xs=5)
                     #self.grid_stat.add_component(Label())
 
 
@@ -200,8 +244,8 @@ class Form1(Form1Template):
                     test = float(x_int_entries[i].text)
                 except :
                     test = 0
-                gap =  (corr_x_ints[i] - test)**2
-                add =  1-gap
+                gap =  corr_x_ints[i] - test
+                add =  1 - math.sqrt(abs(gap/corr_x_ints[i]))
                 score += add if add>0 else 0
 
         for i in range(len(corr_y_ints)):
@@ -210,8 +254,8 @@ class Form1(Form1Template):
                     test = float(y_int_entries[i].text)
                 except :
                     test = 0
-                gap =  (corr_y_ints[i] - test)**2
-                add =  1-gap
+                gap =  corr_y_ints[i] - test
+                add =  1-math.sqrt(abs(gap/corr_y_ints[i]))
                 score += add if add>0 else 0
 
         for i in range(len(corrstats)):
@@ -220,13 +264,14 @@ class Form1(Form1Template):
                     test = (float(stat_entries[i][0].text), float(stat_entries[i][1].text))
                 except:
                     test = 0
-                gap =  (corrstats[i][0] - test[0])**2 + (corrstats[i][1] - test[1])**2
-                add =  1-gap
+                gapx =  corrstats[i][0] - test[0]
+                gapy = corrstats[i][1] - test[1]
+                add =  1- math.sqrt(abs(gapx/(corrstats[i][0]))) - math.sqrt(abs(gapy/(corrstats[i][1])))
                 score += add if add>0 else 0
 
         score *= 100/(len(corrstats) + len(corr_y_ints) + len(corr_x_ints))
 
-        self.lbl_mark.text = "{0}%".format(round(score, 1))
+        self.lbl_mark.text = "{0}%".format(round(score))
 
         colour = "#198dbf"
         self.lbl_mark.background = "#fff"
@@ -245,8 +290,8 @@ class Form1(Form1Template):
 
 
         self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "rgb(224, 181, 52)", pointlabels = xlabs)
-        self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)", pointlabels = ylabs)
-        self.graph.circle_points(self.teststats, "rgb(144, 53, 181)", pointlabels = statlabs)
+        self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)", pointlabels = ylabs, pointoffset = len(xlabs))
+        self.graph.circle_points(self.teststats, "rgb(144, 53, 181)", pointlabels = statlabs, pointoffset = len(xlabs) + len(ylabs))
 
 
     def find_x_intersecs(self, values):
@@ -257,7 +302,7 @@ class Form1(Form1Template):
 
                 testfx = values[i+wid][1]*values[i][1] <=0
 
-                if testfx:
+                if testfx and len(inters) < 10:
                     inters.append( values[i][0])
 
         return inters
@@ -268,7 +313,7 @@ class Form1(Form1Template):
         for i in range(len(values)):
             if i < len(values) -wid:
                 testx = values[i+wid][0]*values[i][0] <=0
-                if testx:
+                if testx  and len(inters) < 10:
                     inters.append(values[i][1])
 
         return inters
@@ -279,7 +324,7 @@ class Form1(Form1Template):
         for i in range(len(values)):
             if i < len(values) -wid and i>wid:
                 test = (values[i+wid][1] - values[i][1])*(values[i][1] - values[i-wid][1]) <=0
-                if test:
+                if test  and len(stats) < 10:
                     stats.append(values[i])
         return stats
 
@@ -390,10 +435,10 @@ class Form1(Form1Template):
             # self.graph4.yrange = self.graph2.yrange
             #self.graph4.plot(colour = "rgb(52, 195, 96)")
 
-
-            self.graph2.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)")
-            self.graph2.circle_points(self.teststats, "rgb(144, 53, 181)")
             self.graph2.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "rgb(224, 181, 52)")
+            self.graph2.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)", pointoffset = len(self.test_x_ints))
+            self.graph2.circle_points(self.teststats, "rgb(144, 53, 181)", pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
+
     def bit_length(self, n):
         s = bin(n)       # binary representation:  bin(-37) --> '-0b100101'
         s = s.lstrip('-0b') # remove leading zeros and minus sign
@@ -411,7 +456,9 @@ class Form1(Form1Template):
         return values
 
     def fill_up(self):
-        step =2*(self.xran[1] - self.xran[0])/self.cw
+        #step =2*(self.xran[1] - self.xran[0])/self.cw
+        step = 10**round(math.log((self.xran[1] - self.xran[0])/10000, 10))
+        print step
         x= self.xran[0] + step
         fx = self.correct_function(x)
         while self.values[-1][0] < self.xran[1]:
