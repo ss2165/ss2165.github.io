@@ -188,21 +188,23 @@ class Form1(Form1Template):
 
 
             if len(self.test_x_ints)>0:
-                int_label = Label(text = " x Intersections", bold = True)
+                int_label = Label(text = "x Intersections", bold = True)
                 self.grid_x_int.add_component(int_label)
 
                 for i in range(len(self.test_x_ints)):
                     box = TextBox(placeholder = "{}".format(chr(i+65)))
+                    box.set_event_handler("pressed_enter", self.btn_check_click)
                     self.x_int_entries.append(box)
                     self.grid_x_int.add_component(box, row = chr(i+65))
 
 
             if len(self.test_y_ints)>0:
-                int_label = Label(text = " y Intersections", bold = True)
+                int_label = Label(text = "y Intersections", bold = True)
                 self.grid_y_int.add_component(int_label)
 
                 for i in range(len(self.test_y_ints)):
                     box = TextBox(placeholder = "{}".format(chr(i+65 + len(self.test_x_ints))))
+                    box.set_event_handler("pressed_enter", self.btn_check_click)
                     self.y_int_entries.append(box)
                     self.grid_y_int.add_component(box, row = chr(i+65))
 
@@ -213,6 +215,8 @@ class Form1(Form1Template):
                 for i in range(len(teststats)):
                     box_x = TextBox(placeholder = "{}: x".format(chr(i+65 + len(self.test_x_ints) + len(self.test_y_ints))))
                     box_y = TextBox(placeholder = "{}: y".format(chr(i+65+ len(self.test_x_ints) + len(self.test_y_ints))))
+                    box_x.set_event_handler("pressed_enter", self.btn_check_click)
+                    box_y.set_event_handler("pressed_enter", self.btn_check_click)
                     self.stat_entries.append((box_x, box_y))
                     self.grid_stat.add_component(box_x, row = chr(i+65),  col_xs=0, width_xs=5)
                     self.grid_stat.add_component(box_y,row = chr(i+65),  col_xs=6, width_xs=5)
@@ -289,9 +293,9 @@ class Form1(Form1Template):
         statlabs = ["({0}, {1})".format(x[0].text, x[1].text) for x in self.stat_entries]
 
 
-        self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "rgb(224, 181, 52)", pointlabels = xlabs)
-        self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)", pointlabels = ylabs, pointoffset = len(xlabs))
-        self.graph.circle_points(self.teststats, "rgb(144, 53, 181)", pointlabels = statlabs, pointoffset = len(xlabs) + len(ylabs))
+        self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "#336888", pointlabels = xlabs)
+        self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "D69648", pointlabels = ylabs, pointoffset = len(xlabs))
+        self.graph.circle_points(self.teststats, "#339664", pointlabels = statlabs, pointoffset = len(xlabs) + len(ylabs))
 
 
     def find_x_intersecs(self, values):
@@ -299,8 +303,10 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
-
-                testfx = values[i+wid][1]*values[i][1] <=0
+                if values[i+wid][1] ==0:
+                    testfx = True
+                else if values[i+wid][1]*values[i][1] < 0
+                    testfx = True
 
                 if testfx and len(inters) < 10:
                     inters.append( values[i][0])
@@ -312,7 +318,11 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
-                testx = values[i+wid][0]*values[i][0] <=0
+                if values[i+wid][0] ==0:
+                    testx = True
+                else if values[i+wid][0]*values[i][0] < 0
+                    testx = True
+        
                 if testx  and len(inters) < 10:
                     inters.append(values[i][1])
 
@@ -435,9 +445,9 @@ class Form1(Form1Template):
             # self.graph4.yrange = self.graph2.yrange
             #self.graph4.plot(colour = "rgb(52, 195, 96)")
 
-            self.graph2.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "rgb(224, 181, 52)")
-            self.graph2.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "rgb(62, 192, 205)", pointoffset = len(self.test_x_ints))
-            self.graph2.circle_points(self.teststats, "rgb(144, 53, 181)", pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
+            self.graph2.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "#336888")
+            self.graph2.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "#D69648", pointoffset = len(self.test_x_ints))
+            self.graph2.circle_points(self.teststats, "#339664", pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
 
     def bit_length(self, n):
         s = bin(n)       # binary representation:  bin(-37) --> '-0b100101'
