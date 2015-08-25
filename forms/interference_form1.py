@@ -56,15 +56,9 @@ class Form1(Form1Template):
         self.moved = 0
         self.draw_all()
 
-    def txt_wave_change (self, **event_args):
-        self.wav = float(self.txt_wave.text)
-        for point in self.points:
-            point.wavelength = self.wav
 
-    def txt_spd_change (self, **event_args):
-        self.spd = float(self.txt_spd.text)
-        for point in self.points:
-            point.speed = self.spd
+
+
 
     def btn_run_click (self, **event_args):
 
@@ -96,7 +90,7 @@ class Form1(Form1Template):
         canvas = self.canvas
         draw.reset2(self.canvas, self.xu)
         draw.clear_canvas(self.canvas, "#fff")
-
+        self.wav = self.slid_wav.value
         # div = self.cw/(self.xu*10.0)
         # canvas.begin_path()
         # for i in range(10):
@@ -140,6 +134,7 @@ class Form1(Form1Template):
         dt = self.dt
 
         if self.first:
+            self.slid_wav = draw.slider(self.can_slid, 0.001, 0.1, stepsize = 0.001, start = 0.01)
             self.xu = self.cw
             self.initalize()
             self.init_pos(self.points)
@@ -158,8 +153,8 @@ class Form1(Form1Template):
         self.points[1].pos = physics.vector3(self.cw/(2.0*self.xu) + 0.05, self.ch/(2.0*self.xu))
 
     def initalize(self):
-        self.spd = float(self.txt_spd.text)
-        self.wav = float(self.txt_wave.text)
+        self.spd = 0.1
+        self.wav = self.slid_wav.value
         self.point1 = physics.point_source(radius = 0.01, speed= self.spd, wavelength = self.wav)
         #self.point1.vel = physics.vector3(0.1,0)
         self.point2 = physics.point_source(radius = 0.01, speed= self.spd, wavelength = self.wav)
@@ -172,8 +167,6 @@ class Form1(Form1Template):
         # For example, if we've drawn a button called "send_button", we can
         # refer to it as self.send_button:
         self.init_components()
-        self.initalize()
-
 
         self.mouse = physics.vector3(0,0)
         self.moved = 0

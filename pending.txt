@@ -12,6 +12,7 @@ draw
 
 
 
+
 E and B:
    Issues:
        /border resizing
@@ -22,15 +23,15 @@ E and B:
         /Cartesian arrows for E&B
         Find better place to put them (cart arrows)
         Sanitize input
-        Bezier trails
+        /Bezier trails
 
 
 slider
     /Make form
 dimensionality
-    exponents, cos, sin, power terms, log
-    duplicate search
-    filter
+    /exponents, cos, sin, power terms, log
+    /duplicate search
+    /filter
 
 
 Collider:
@@ -47,14 +48,16 @@ replace with:
 
 
 Maths:
-  RUNGE KUTTA
+  /RUNGE KUTTA
   integrator
   line integrator
-  Dimensionality checker
+  /Dimensionality checker
 
 Waves:
- point source animations -https://en.wikipedia.org/wiki/Doppler_effect
-doppler/interference
+ /point source animations -https://en.wikipedia.org/wiki/Doppler_effect
+/doppler/interference
+/add sliders
+
 
 QUESTIONS:
 
@@ -69,3 +72,10 @@ pressed_enter for TextArea?
 linking methods to code added components?
 
 measure_text, unclear returns dict
+
+
+
+/New
+Latex rendering
+folders in choose an app
+migration to project google, easy way?

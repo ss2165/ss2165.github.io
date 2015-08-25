@@ -174,6 +174,186 @@ class vector3():
     def __str__(self):
         return "({0.x}, {0.y}, {0.z})".format(self)
 
+class complex2():
+    """Complex number"""
+
+    def __init__(self,re, im):
+        if not isinstance(re, (int, long, float)) or not isinstance(im, (int, long, float)):
+            raise "Arguments are not numbers"
+        self.re = re
+        self.im = im
+
+    def mag(self):
+        #magnitude
+        return math.sqrt(self.re**2 + self.im**2)
+
+    def phase(self):
+        #polar angle in radians, between 0 and pi
+        return math.atan2(self.im, self.re)
+
+    # def multi(self, a):
+    #     #scalar multiple
+    #     return vector3(a*self.x, a*self.y, a*self.z)
+    # def norm(self):
+    #     #normalised vector
+    #     mag = self.mag()
+    #     if mag == 0:
+    #         return self
+    #     else:
+    #         return vector3(self.x/mag, self.y/mag, self.z/mag)
+
+    def polar(self):
+        return (self.mag(), self.phase())
+    def phi_rotate(self, angle, origin):
+        #returns vector with phi changed by angle in anti clockwise direction
+        diff= self - origin
+        sin = math.sin(angle)
+        cos = math.cos(angle)
+        new = complex2(cos*diff.x - sin*diff.y, +sin*diff.x + cos*diff.y)
+        return new + origin
+
+    def __abs__(self):
+        return math.sqrt(self.re**2 + self.im**2)
+    def __add__(self, other):
+        if isinstance(other, complex2):
+            return complex2(self.re+other.re, self.im+other.im)
+        else:
+            return complex2(self.re+other, self.im)
+    def __iadd__(self, other):
+        if isinstance(other, complex2):
+            self.re += other.re
+            self.im += other.im
+        else:
+            self.re += other
+        return self
+
+    def __sub__(self, other):
+        if isinstance(other, complex2):
+            return complex2(self.re-other.re, self.im-other.im)
+        else:
+            return complex2(self.re-other, self.im)
+
+    def __isub__(self, other):
+        if isinstance(other, complex2):
+            self.re -= other.re
+            self.im -= other.im
+        else:
+            self.re -= other
+        return self
+
+    def __mul__(self, other):
+        if isinstance(other, complex2):
+            return complex2(other.re*self.re - other.im*self.im, other.re*self.im + other.im*self.re)
+        else:
+            return complex2(other*self.re, other*self.im)
+
+    def __imul__(self, other):
+        if isinstance(other, complex2):
+            self =  complex2(other.re*self.re - other.im*self.im, other.re*self.im + other.im*self.re)
+        else:
+            self.re *= other
+            self.im *= other
+        return self
+
+    def __rmul__(self, other):
+        return complex2(other*self.re, other*self.im)
+
+    def __div__(self, other):
+        if not isinstance(other, complex2):
+            return complex2(self.re/other, self.im/other)
+        else:
+            return self
+
+    def __idiv__(self, other):
+        if not isinstance(other, complex2):
+            self.re /= other
+            self.im /= other
+            return self
+        else:
+            return self
+
+    def __str__(self):
+        return "{0.re} + {0.im}i".format(self)
+
+def exp2(x):
+    if isinstance(x, complex2):
+        return math.exp(x.re)*complex2(math.cos(x.im), math.sin(x.im))
+    else:
+        return complex2(math.exp(x), 0)
+
+def disc_convolve(f, g):
+    """Return discrete convolution list of two discrete function iterables f and g"""
+    #treating g as smaller function
+    # if len(f) < len(g):
+    #     f, g = g, f
+
+    result = []
+    for i in range(len(f)):
+        sums = 0
+        for j in range(len(g)):
+            if i>=j:
+                sums += f[i-j]*g[j]
+        result.append(sums)
+    return result
+
+def dfft(x, N, s=1, inverse = False):
+
+    inv = -1 if inverse else 1
+
+    if N == 1:
+        if isinstance(x[0], complex2):
+            return x
+        else:
+            return [complex2(x[0],0)]
+    else:
+        X = dfft(x, N/2,  s=2*s, inverse = inverse) + dfft(x[s:], N/2, s =2*s, inverse = inverse)
+        i = complex2(0, 1)
+        for k in range(N/2):
+            t = X[k]
+            r = inv*exp2(-2*inv*math.pi*i*k/N)*X[k+N/2]
+            X[k] = (t + r)
+            X[k+N/2] = (t - r)
+        if inverse and s == 1:
+            X = [x/N for x in X]
+        return X
+
+def inv_dfft(x):
+    N = len(x)
+    swapped = []
+    for value in x:
+        if not isinstance(value, complex2):
+            raise "not complex input"
+        swapped.append(complex2(value.im, value.re))
+    X = dfft(swapped,N,1 )
+    result = []
+    for value in X:
+        result.append(value.im/N)
+    return result
+
+def disc_fourier(x):
+    X  = []
+    i = complex2(0, 1)
+    N = len(x)
+    for k in range(N):
+        result = complex2(0,0)
+        for n in range(N):
+            result += x[n]*exp2(-2*math.pi*i*n*k/N)
+        X.append(result)
+
+    return X
+
+def disc_inv_fourier(X):
+    x  = []
+    i = complex2(0, 1)
+    N = len(X)
+    for n in range(N):
+        result = complex2(0,0)
+        for k in range(N):
+            result += X[k]*exp2(2*math.pi*i*n*k/N)
+        x.append(result.re/N)
+
+    return x
+
 def runge_kutta4(y, f, t, dt):
     """Return next iteration of function y with derivative f with timestep dt using Runge-Kutta 4th order"""
     k1 = f(t, y)
@@ -253,3 +433,26 @@ def num_secant(function, guess1, guess2, iterations, tol = 0.000001):
         guess2 = guess1
         guess1 = c
     return guess1
+
+def diff(values):
+    res = []
+    for i in range(len(values)-1):
+        x1,y1  = values[i]
+        x2, y2 = values[i+1]
+        if x2 != x1:
+            res.append((x1, (y2-y1)/(x2-x1)))
+
+    return res
+
+def diff_5(values):
+    res = []
+    for i in range(2,len(values)-2):
+        h = values[i+1][0] - values[i][0]
+        y1= values[i+1][1]
+        y2= values[i+2][1]
+        y_1= values[i-1][1]
+        y_2= values[i-2][1]
+        if h != 0:
+            res.append((values[i][0], (-y2 + 8*y1 - 8*y_1 + y_2)/(12*h)))
+
+    return res

@@ -13,16 +13,26 @@ class Form1(Form1Template):
         ch = self.ch
 
         canvas = self.canvas
+        if self.first:
+            self.slid_N = draw.slider(self.can_N, 3, 30, stepsize = 1, start = 4)
+            self.slid_v = draw.slider(self.can_v, 0, 1, stepsize = 0.01, start = 0.01)
+            self.slid_L = draw.slider(self.can_L, 0.01, 1, stepsize = 0.01, start = 0.1)
+            self.L = self.slid_L.value
+            self.v =self.slid_v.value
+            self.N =self.slid_N.value
+            self.param_boxes += [self.slid_N, self.slid_L, self.slid_v]
+            self.a = 2*math.pi/self.N
+            self.first = False
 
         L = self.L
         v = self.v
+        self.a = 2*math.pi/self.N
         a = self.a
         #distance from centre to middle of one side
         self.d = float(L)*math.sqrt((1+math.cos(a))/(1-math.cos(a)))/2
         d = self.d
-        if self.reset and not self.zoom:
-            self.xu  =self.give_xu(self.ch, self.d)
-            self.newxu = self.give_xu(self.ch, self.d)
+
+        self.xu  =self.give_xu(self.ch, self.d)
         xu = self.xu
         #if self.reset:
         self.initial(canvas)
@@ -40,16 +50,21 @@ class Form1(Form1Template):
                 self.btn_run.text = "Run"
                 #self.initial(canvas)
 
-        if -0.1 <= self.xu - self.newxu <= 0.1:
-            self.zoom = False
-        if self.zoom:
-            self.xu += self.step
+        # if -0.1 <= self.xu - self.newxu <= 0.1:
+        #     self.zoom = False
+        # if self.zoom:
+        #     self.xu += self.step
 
         self.counter += 1
 
     def initial(self, canvas):
         draw.reset2(canvas, self.xu)
         draw.clear_canvas(canvas, "#fff")
+
+        self.N  =  self.slid_N.value
+        self.L = self.slid_L.value
+        self.v = self.slid_v.value
+
         self.draw_polygon(canvas, self.N, self.L)
         if self.reset:
             self.bug.pos = physics.vector3(-self.L/2, self.d, 0)
@@ -81,21 +96,21 @@ class Form1(Form1Template):
             canvas.stroke()
 
 
-    def txt_change (self, **event_args):
-        if len(self.txt_N.text)>0 and len(self.txt_L.text)>0 and len(self.txt_v.text)>0:
-            if  30 >= int(self.txt_N.text)>2:
-                self.N  =  int(self.txt_N.text)
-            if 1>=float(self.txt_L.text)>=0.01:
-                self.L = float(self.txt_L.text)
-            if 1>=float(self.txt_v.text)>=0:
-                self.v = float(self.txt_v.text)
-            self.zoom = True
-            self.a = 2*math.pi/self.N
-
-            self.oldxu = self.xu
-            self.d = float(self.L)*math.sqrt((1+math.cos(self.a))/(1-math.cos(self.a)))/2
-            self.newxu = self.give_xu(self.ch, self.d)
-            self.step = (self.newxu-self.oldxu)/20
+    # def txt_change (self, **event_args):
+    #     if len(self.txt_N.text)>0 and len(self.txt_L.text)>0 and len(self.txt_v.text)>0:
+    #         if  30 >= int(self.txt_N.text)>2:
+    #             self.N  =  int(self.txt_N.text)
+    #         if 1>=float(self.txt_L.text)>=0.01:
+    #             self.L = float(self.txt_L.text)
+    #         if 1>=float(self.txt_v.text)>=0:
+    #             self.v = float(self.txt_v.text)
+    #         self.zoom = True
+    #         self.a = 2*math.pi/self.N
+    #
+    #         self.oldxu = self.xu
+    #         self.d = float(self.L)*math.sqrt((1+math.cos(self.a))/(1-math.cos(self.a)))/2
+    #         self.newxu = self.give_xu(self.ch, self.d)
+    #         self.step = (self.newxu-self.oldxu)/20
     def give_xu(self, ch, d):
         return (ch/0.5)*(0.12/d)
     def draw_bugs(self, canvas, pos, colour):
@@ -163,16 +178,10 @@ class Form1(Form1Template):
         self.path  = [self.bug.pos, self.bug.pos]
         self.counter = 0
 
-        self.N  =  int(self.txt_N.text)
-        self.L = float(self.txt_L.text)
-        self.v = float(self.txt_v.text)
-        self.a = 2*math.pi/self.N
+        self.first = True
+
 
         self.dt = self.timer.interval
         self.t = 0
         #list of parameter inputs
         self.param_boxes = []
-
-        self.param_boxes.append(self.txt_N)
-        self.param_boxes.append(self.txt_L)
-        self.param_boxes.append(self.txt_v)

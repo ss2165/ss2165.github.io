@@ -30,26 +30,6 @@ class Form1(Form1Template):
             self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
         self.draw_all()
 
-    def can_slid_mouse_move (self, x, y, **event_args):
-        self.slider1.mouse_move(x, y)
-        if self.reset and self.slider1.mousedown:
-            scale = self.slider1.value
-            self.oldxu  = 1.0*self.xu
-            self.newxu = self.cw/10.0*scale
-            self.zoom = True
-
-    def can_slid_mouse_up (self, x, y, button, **event_args):
-        self.slider1.mouse_up(x, y)
-    def can_slid_mouse_down (self, x, y, button, **event_args):
-        self.slider1.mouse_down(x, y)
-        if self.reset and self.slider1.mousedown:
-            scale = self.slider1.value
-            self.oldxu  = 1.0*self.xu
-            self.newxu = self.cw/10.0*scale
-            self.zoom = True
-
-
-
     def canvas_mouse_move (self, x, y, **event_args):
         # This method is called when the mouse cursor moves over this component
         #record mouse pos
@@ -99,7 +79,7 @@ class Form1(Form1Template):
         cw = self.cw
         ch = self.ch
         dt = self.dt
-
+        old = self.old
         self.grid_custom.visible = self.custom.selected
 
         if self.first:
@@ -107,11 +87,12 @@ class Form1(Form1Template):
             self.initialize()
             self.init_pos()
             self.slider1 = draw.slider(self.can_slid, mini= 0.1, maxi = 4, stepsize = 0.1, start=1)
-            self.slider1.indicator = True
+            self.slider1.maxmin = True
             self.slider1.draw()
             self.param_boxes.append(self.slider1)
             self.first = False
             self.draw_all()
+
 
         ball = self.ball
         if self.running:
@@ -129,13 +110,20 @@ class Form1(Form1Template):
             self.t += dt
             self.draw_all()
 
-        if self.zoom:
-            self.xu += (self.newxu-self.oldxu)/20
-            self.init_pos()
-            if -0.05 <=(self.xu - self.newxu) <= 0.05:
-                self.zoom = False
+        new = self.slider1.value
+
+        if new != old:
+            scale = self.slider1.value
+            #self.oldxu  = 1.0*self.xu
+            self.xu = self.cw/10.0*scale
+            # self.xu += (self.newxu-self.oldxu)/20
+            #self.init_pos()
+            # if -0.05 <=(self.xu - self.newxu) <= 0.05:
+            #     self.zoom = False
 
             self.draw_all()
+
+        old = new*1
 
     def btn_path_click (self, **event_args):
         self.paths= []
@@ -180,7 +168,7 @@ class Form1(Form1Template):
         self.init_pos()
 
         self.draw_all()
-        
+
     def draw_all(self):
         canvas = self.canvas
         xu = self.xu
@@ -285,7 +273,7 @@ class Form1(Form1Template):
         self.t = 0
         #SET SCALE (pixels per m, or unit used in code)
         self.xu =5
-
+        self.old = 1
         self.paths = []
         self.cur_path = []
         self.trail= []

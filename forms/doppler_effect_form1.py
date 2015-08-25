@@ -7,67 +7,6 @@ class Form1(Form1Template):
     default_colour = "#32a4dd"
     default_colour_wave = "#c63939"
 
-    # def canvas_mouse_move (self, x, y, **event_args):
-    #
-    #     # This method is called when the mouse cursor moves over this component
-    #     #record mouse pos
-    #     self.mouse.x = x/(self.xu*1.0)
-    #     self.mouse.y = (self.ch-y)/(self.xu*1.0)
-    #     #
-    #     # #change text box value based on where mouse is
-    #     for point in self.points:
-    #         if point.mousedown:
-    #             point.pos += self.mouse - point.pos
-    #             self.draw_all()
-    #
-    #             self.moved +=1
-    # def canvas_mouse_up (self, x, y, button, **event_args):
-    # # This method is called when a mouse button is released on this component
-    #     self.mouse.x = x/(self.xu*1.0)
-    #     self.mouse.y = (self.ch-y)/(self.xu*1.0)
-    #
-    #     for point in self.points:
-    #         point.mousedown = False
-    #
-    #     detect = False
-    #     #if mouse is within a ball, record it
-    #     for point in self.points:
-    #         if (self.mouse - point.pos).mag()<point.radius:
-    #             detect = True
-    #             if self.moved <=2:
-    #                 self.points.remove(point)
-    #     if not detect:
-    #         newpoint = physics.point_source(radius = 0.01, speed= self.spd, wavelength =self.wav)
-    #         newpoint.pos = self.mouse*1.0
-    #         newpoint.vel  = physics.vector3(0.1, 0)
-    #         self.points.append(newpoint)
-    #
-    #
-    #     self.draw_all()
-    #
-    # def canvas_mouse_down (self, x, y, button, **event_args):
-    #     # This method is called when a mouse button is pressed on this component
-    #     self.mouse.x = x/(self.xu*1.0)
-    #     self.mouse.y = (self.ch-y)/(self.xu*1.0)
-    #
-    #     for point in self.points:
-    #         if (self.mouse - point.pos).mag()<point.radius:
-    #             point.mousedown = True
-    #
-    #     self.moved = 0
-    #     self.draw_all()
-
-
-    def can_slid_mouse_move (self, x, y, **event_args):
-        self.spd_slider.mouse_move(x, y)
-        self.spd_slider.draw()
-    def can_slid_mouse_up (self, x, y, button, **event_args):
-        self.spd_slider.mouse_up(x, y)
-        self.spd_slider.draw()
-    def can_slid_mouse_down (self, x, y, button, **event_args):
-        self.spd_slider.mouse_down(x, y)
-        self.spd_slider.draw()
-
     def txt_wave_change (self, **event_args):
         self.wav = float(self.txt_wave.text)
         for point in self.points:
@@ -96,8 +35,8 @@ class Form1(Form1Template):
         self.running = False
         self.reset = True
         self.btn_run.text = "Run"
-        #self.initalize()
-        #self.init_pos(self.points)
+        self.initalize()
+        self.init_pos(self.points)
         for point in self.points:
             point.wavefront = 0
         self.pulses = []
@@ -111,15 +50,9 @@ class Form1(Form1Template):
         draw.clear_canvas(self.canvas, "#fff")
         big = math.sqrt((self.cw/self.xu*1.0)**2 + (self.ch/self.xu*1.0)**2)
 
-        # div = self.cw/(self.xu*10.0)
-        # canvas.begin_path()
-        # for i in range(10):
-        #     canvas.move_to(i*div, 0)
-        #     canvas.line_to(i*div, self.ch/(self.xu*1.0))
-        #
-        # canvas.line_width = 0.003
-        # canvas.stroke()
+
         for point in self.points:
+            point.vel.x = self.spd_slider.value*0.1
             self.draw_source(point, self.canvas)
         for point in self.pulses:
             if point.wavefront >big:
@@ -160,12 +93,15 @@ class Form1(Form1Template):
             self.xu = self.cw
             self.initalize()
             self.init_pos(self.points)
-            self.draw_all()
-            self.spd_slider = draw.slider(self.can_slid, mini= 0.1, maxi = 3, stepsize = 0.1, start=0.85)
-            self.spd_slider.indicator = True
-            self.spd_slider.draw()
-            self.first = False
 
+            self.spd_slider = draw.slider(self.can_slid, mini= 0.1, maxi = 3, stepsize = 0.1, start=0.6, colour = self.default_colour_wave)
+            self.spd_slider.indicator = True
+            for point in self.points:
+                point.vel.x = self.spd_slider.value*0.1
+            self.spd_slider.draw()
+            self.draw_all()
+            self.first = False
+            
         if self.running:
             for point in self.points:
                 point.move(dt)
@@ -184,7 +120,7 @@ class Form1(Form1Template):
         self.t += self.dt
 
     def init_pos(self,points):
-        self.points[0].pos = physics.vector3(self.cw/(2.0*self.xu) - 0.05, self.ch/(2.0*self.xu))
+        self.points[0].pos = physics.vector3(0.05, self.ch/(2.0*self.xu))
         #self.points[1].pos = physics.vector3(self.cw/(2.0*self.xu) + 0.05, self.ch/(2.0*self.xu))
 
     def initalize(self):

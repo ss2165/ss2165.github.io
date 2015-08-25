@@ -113,33 +113,6 @@ class Form1(Form1Template):
       box.enabled = self.reset
 
 
-  def can_slid_mouse_move (self, x, y, **event_args):
-    self.slider1.mouse_move(x, y)
-    if self.reset and self.slider1.mousedown:
-      scale = self.slider1.value
-      self.oldxu  = 1.0*self.xu
-      self.newxu = self.cw/(self.bigrad*2*10)*scale
-      self.zoom = True
-
-  def can_slid_mouse_up (self, x, y, button, **event_args):
-    self.slider1.mouse_up(x, y)
-  def can_slid_mouse_down (self, x, y, button, **event_args):
-    self.slider1.mouse_down(x, y)
-    if self.reset and self.slider1.mousedown:
-      scale = self.slider1.value
-      self.oldxu  = 1.0*self.xu
-      self.newxu = self.cw/(self.bigrad*2*10)*scale
-      self.zoom = True
-  # def txt_zoom_change (self, **event_args):
-  #   # This method is called when the text in this text box is edited
-  #   if self.reset:
-  #       scale = float(self.txt_zoom.text)
-  #       if 0.1<=scale<=4 :
-  #           self.oldxu  = 1.0*self.xu
-  #           self.newxu = self.cw/(self.bigrad*2*10)*scale
-  #           self.zoom = True
-  #
-  #       #self.init_balls_pos()
 
   def timer_1_tick (self, **event_args):
     # This method is called Every [interval] seconds
@@ -152,7 +125,7 @@ class Form1(Form1Template):
     #initalize balls at first iteration
     if self.first:
       #pixels per m, based on large ball diameter, canvas 10 ball widths
-      self.xu  = self.cw/(self.bigrad*2*10)
+      self.xu = self.cw/(self.bigrad*2*10)
       self.balls = []
       for i in range(0,4):
           x = physics.ball(1, self.bigrad)
@@ -166,6 +139,7 @@ class Form1(Form1Template):
       self.init_balls_pos()
       self.first = False
 
+    self.xu = self.cw/(self.bigrad*2*10)*self.slider1.value
     #draw everything
     self.draw_all()
 
