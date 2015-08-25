@@ -503,22 +503,24 @@ class Form1(Form1Template):
             self.ch = canvas.get_height()
             cw = self.cw
             ch = self.ch
-            self.fill_up()
-            self.graph = draw.graph_plot(canvas, self.values)
+
+            self.graph = draw.graph_plot(canvas, [(-0.01,-0.01),(0.01,0.01)])
             self.graph.markers_enabled = False
             if self.set_xrange != [None, None]:
                 self.graph.xrange = self.set_xrange
+            else:
+                self.graph.xrange = [self.xran[0], self.xran[1]]
             if self.set_yrange != [None, None]:
                 self.graph.yrange = self.set_yrange
             self.graph.xlabel = self.xlabel
             self.graph.ylabel = self.ylabel
             self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
+            self.fill_up()
             self.first = False
 
         while canvas.get_width() != self.cw:
             self.btn_clear_click()
             self.cw = canvas.get_width()
-            time.sleep(0.5)
 
 
 
