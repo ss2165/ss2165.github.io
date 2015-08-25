@@ -2,6 +2,7 @@ from anvil import *
 import physics
 import draw
 import math
+import time
 
 from settings import settings
 
@@ -62,7 +63,7 @@ class Form1(Form1Template):
     def btn_clear_click (self, **event_args):
         draw.reset2(self.canvas, 1)
         draw.clear_canvas(self.canvas, "#fff")
-        self.graph2.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
+        self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
         self.newvalues = []
         self.all = []
         self.grid_stat.clear()
@@ -267,7 +268,7 @@ class Form1(Form1Template):
                 try:
                     test = (float(stat_entries[i][0].text), float(stat_entries[i][1].text))
                 except:
-                    test = 0
+                    test = (0,0)
                 gapx =  corrstats[i][0] - test[0]
                 gapy = corrstats[i][1] - test[1]
                 add =  1- math.sqrt(abs(gapx/(corrstats[i][0]))) - math.sqrt(abs(gapy/(corrstats[i][1])))
@@ -286,8 +287,8 @@ class Form1(Form1Template):
             self.lbl_mark.text += "\nScore  over {0}% to pass".format(self.pass_mark)
 
         draw.clear_canvas(self.canvas)
-        self.graph2.axes_enabled = True
-        self.graph2.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
+        self.graph.axes_enabled = True
+        self.graph.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
         xlabs = [x.text for x in self.x_int_entries]
         ylabs = [x.text for x in self.y_int_entries]
         statlabs = ["({0}, {1})".format(x[0].text, x[1].text) for x in self.stat_entries]
@@ -417,39 +418,39 @@ class Form1(Form1Template):
             #     self.lbl_mark.text += "\nScore  over {0}% to pass".format(self.pass_mark)
 
             #self.graph.plot()
-
-            self.graph2 = draw.graph_plot(self.canvas, self.newvalues)
-            self.graph2.axes_enabled = True
-            self.graph2.markers_enabled = False
-            self.graph2.xlabel = self.xlabel
-            self.graph2.ylabel = self.ylabel
-            self.graph2.xrange = self.graph.xrange
-            self.graph2.yrange = self.graph.yrange
-            self.graph2.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
+            self.graph.func(self.newvalues)
+            #self.graph = draw.graph_plot(self.canvas, self.newvalues)
+            # self.graph.axes_enabled = True
+            # self.graph.markers_enabled = False
+            # self.graph.xlabel = self.xlabel
+            # self.graph.ylabel = self.ylabel
+            # self.graph.xrange = self.graph.xrange
+            # self.graph.yrange = self.graph.yrange
+            self.graph.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
 
 
             # diffd = self.gauss_blur([diffd],10)
             # self.graph3 = draw.graph_plot(self.canvas, diffd)
             # self.graph3.axes_enabled = False
-            # self.graph3.xlabel = self.graph2.xlabel
-            # self.graph3.ylabel = self.graph2.ylabel
-            # self.graph3.xrange = self.graph2.xrange
-            # self.graph3.yrange = self.graph2.yrange
+            # self.graph3.xlabel = self.graph.xlabel
+            # self.graph3.ylabel = self.graph.ylabel
+            # self.graph3.xrange = self.graph.xrange
+            # self.graph3.yrange = self.graph.yrange
             # #self.graph3.plot()
             #
             # diffd2 = physics.diff_5(diffd)
             # diffd2 = self.gauss_blur([diffd2],10)
             # self.graph4 = draw.graph_plot(self.canvas, diffd2)
             # self.graph4.axes_enabled = False
-            # self.graph4.xlabel = self.graph2.xlabel
-            # self.graph4.ylabel = self.graph2.ylabel
-            # self.graph4.xrange = self.graph2.xrange
-            # self.graph4.yrange = self.graph2.yrange
+            # self.graph4.xlabel = self.graph.xlabel
+            # self.graph4.ylabel = self.graph.ylabel
+            # self.graph4.xrange = self.graph.xrange
+            # self.graph4.yrange = self.graph.yrange
             #self.graph4.plot(colour = "rgb(52, 195, 96)")
 
-            self.graph2.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "#336888")
-            self.graph2.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "#D69648", pointoffset = len(self.test_x_ints))
-            self.graph2.circle_points(self.teststats, "#339664", pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
+            self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), "#336888")
+            self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), "#D69648", pointoffset = len(self.test_x_ints))
+            self.graph.circle_points(self.teststats, "#339664", pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
 
     def bit_length(self, n):
         s = bin(n)       # binary representation:  bin(-37) --> '-0b100101'
@@ -479,12 +480,13 @@ class Form1(Form1Template):
 
     def timer_tick (self, **event_args):
         canvas = self.canvas
-        self.cw = canvas.get_width()
-        self.ch = canvas.get_height()
-        cw = self.cw
-        ch = self.ch
+
 
         if self.first:
+            self.cw = canvas.get_width()
+            self.ch = canvas.get_height()
+            cw = self.cw
+            ch = self.ch
             self.fill_up()
             self.graph = draw.graph_plot(canvas, self.values)
             self.graph.markers_enabled = False
@@ -496,6 +498,14 @@ class Form1(Form1Template):
             self.graph.ylabel = self.ylabel
             self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
             self.first = False
+
+        while canvas.get_width() != self.cw:
+            self.btn_clear_click()
+            self.cw = canvas.get_width()
+            time.sleep(0.5)
+
+
+
 
     def __init__(self):
         # This sets up a variable for every component on this form.
