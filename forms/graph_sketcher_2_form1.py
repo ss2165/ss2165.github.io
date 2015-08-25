@@ -35,7 +35,7 @@ class Form1(Form1Template):
             self.canvas.line_to(x,y)
             self.canvas.stroke()
 
-        self.lbl_cord.text = "({0}, {1})".format(self.graph.num_string(xy[0]), self.graph.num_string(xy[1]))
+        #self.lbl_cord.text = "({0}, {1})".format(self.graph.num_string(xy[0]), self.graph.num_string(xy[1]))
 
     def canvas_mouse_up (self, x, y, button, **event_args):
         self.mousedown = False
@@ -303,9 +303,10 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
+                testfx = False
                 if values[i+wid][1] ==0:
                     testfx = True
-                else if values[i+wid][1]*values[i][1] < 0
+                elif values[i+wid][1]*values[i][1] < 0:
                     testfx = True
 
                 if testfx and len(inters) < 10:
@@ -318,11 +319,12 @@ class Form1(Form1Template):
         wid = 1
         for i in range(len(values)):
             if i < len(values) -wid:
+                testx = False
                 if values[i+wid][0] ==0:
                     testx = True
-                else if values[i+wid][0]*values[i][0] < 0
+                elif values[i+wid][0]*values[i][0] < 0:
                     testx = True
-        
+
                 if testx  and len(inters) < 10:
                     inters.append(values[i][1])
 
