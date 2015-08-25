@@ -304,7 +304,7 @@ class Form1(Form1Template):
         for i in range(len(values)):
             if i < len(values) -wid:
                 testfx = False
-                if values[i+wid][1] ==0:
+                if values[i][1] ==0:
                     testfx = True
                 elif values[i+wid][1]*values[i][1] < 0:
                     testfx = True
@@ -320,7 +320,7 @@ class Form1(Form1Template):
         for i in range(len(values)):
             if i < len(values) -wid:
                 testx = False
-                if values[i+wid][0] ==0:
+                if values[i][0] ==0:
                     testx = True
                 elif values[i+wid][0]*values[i][0] < 0:
                     testx = True
