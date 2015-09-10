@@ -548,18 +548,18 @@ def fill_up(function, xran, step_mult=1):
     #stepsize nearest power of 10 to 1/10000th of range
     step = step_mult*10**math.floor(math.log((xran[1] - xran[0])/10000, 10))
     x= xran[0]
-    fx = function(x)
-    values = [(x, fx)]
+    values = []
 
-    x += step
+    #x += step
 
-    while values[-1][0] < xran[1]:
+    while x < xran[1]:
         try:
             values.append((x, function(x)))
         #skip singular points
         except ZeroDivisionError:
             pass
         x += step
+
     return values
 
 def extract_vals(box_list):
