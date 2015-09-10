@@ -61,7 +61,6 @@ class graph_plot():
 
         self.yrange = [min(self.fx), max(self.fx)]
         self.xrange = [min(self.x), max(self.x)]
-
         self.line_width = 2
 
         self.axes_enabled = True
@@ -78,24 +77,24 @@ class graph_plot():
         self.fx = []
 
         #check if there are more values than pixels, if so reduce resolution of values
-        if len(values) > self.canvas.get_width():
-            try:
-                #a value per pixel
-                newstep =float(self.xrange[1] - self.xrange[0])/self.canvas.get_width()
-
-            except AttributeError:
-                #if xrange hasn't been set yet
-                x = zip(*values)[0]
-                newstep = float(max(x) - min(x) )/self.canvas.get_width()
-
-            for x,y in values:
-                if abs(x/newstep - int(x/newstep)) <= 0.1:
-                    self.x.append(x)
-                    self.fx.append(y)
-        else:
-            for value in values:
-                self.x.append(value[0])
-                self.fx.append(value[1])
+        # if len(values) > self.canvas.get_width():
+        #     x, y = zip(*values)
+        #     try:
+        #         #a value per pixel
+        #         newstep =float(self.xrange[1] - self.xrange[0])/self.canvas.get_width()
+        #
+        #     except AttributeError:
+        #         #if xrange hasn't been set yet
+        #         newstep = float(max(x) - min(x) )/self.canvas.get_width()
+        #     for x,y in values:
+        #         if abs(x % newstep - newstep) <= newstep/5.0:
+        #             self.x.append(x)
+        #             self.fx.append(y)
+        #     print len(values), len(self.x), self.canvas.get_width()
+        # else:
+        for x, y in values:
+            self.x.append(x)
+            self.fx.append(y)
 
 
     def transform(self):
@@ -151,27 +150,36 @@ class graph_plot():
         self.transform()
 
         canvas.begin_path()
-
         for i in range(len(self.x)):
-
+            #canvas can't plot values that are too big or too small
+            # if abs(x[i]) < 1e-9:
+            #     x[i] = 0.0
+            if abs(fx[i]*self.yu) > 1e4:
+                if fx[i] < 0:
+                    fx[i] = -1e4/self.yu
+                else:
+                    fx[i] = 1e4/self.yu
             if i ==0:
                 canvas.move_to(x[i], fx[i])
+            # elif abs(x[i]) < 1e-5:
+            #     print x[i]
+            else:
 
-            #check value is within plot range
-            xcheck = self.xrange[0] <= x[i] <=self.xrange[1]
-            ycheck = self.yrange[0] <= fx[i] <=self.yrange[1]
+                #check value is within plot range
+                xcheck = self.xrange[0] <= x[i] <=self.xrange[1] and self.xrange[0] <= x[i - 1] <=self.xrange[1]
+                ycheck = self.yrange[0] <= fx[i] <=self.yrange[1] and self.xrange[0] <= fx[i - 1] <=self.xrange[1]
 
-            if xcheck and ycheck:
-                #check subsequent values are not too far apart (discontinuity)
-                xcheck2 =abs(x[i] - x[i-1]) <= 100/self.xu
-                ycheck2 = abs(fx[i] - fx[i-1]) <=100/self.yu
+                if xcheck and ycheck:
+                    #check subsequent values are not too far apart (discontinuity)
+                    xcheck2 =abs(x[i] - x[i-1]) <= 50/self.xu
+                    ycheck2 = abs(fx[i] - fx[i-1]) <= 50/self.yu
 
-                if xcheck2 and ycheck2:
-                    canvas.line_to(x[i], fx[i])
+                    if xcheck2 and ycheck2:
+                        canvas.line_to(x[i], fx[i])
+                    else:
+                        canvas.move_to(x[i], fx[i])
                 else:
                     canvas.move_to(x[i], fx[i])
-            else:
-                canvas.move_to(x[i], fx[i])
 
 
         canvas.stroke_style = colour
@@ -482,7 +490,7 @@ def find_intersecs(values, tol = 1, x = False, y = False):
     return inters
 
 
-def find_stationary(values, tol = 1):
+def find_stationary(values, tolx=1, toly=1):
     """Finds minima in maxima in list of (x,y) tuples and returns list of found tuples.
 
     values (list) -- list of tuples to search.
@@ -500,7 +508,7 @@ def find_stationary(values, tol = 1):
             y_2 = values[i-1][1]
 
             #if sign change in gradient and sufficiently close together
-            test = (y2 - y1)*(y1 - y_2) <=0  and abs(y2 - y1) <= tol  and abs(y_2 - y1) <= tol and abs(x2 - x1) <= tol  and abs(x_2 - x1) <= tol
+            test = (y2 - y1)*(y1 - y_2) <=0  and abs(y2 - y1) <= toly  and abs(y_2 - y1) <= toly and abs(x2 - x1) <= tolx  and abs(x_2 - x1) <= tolx
             if test  and len(stats) < 10:
                 stats.append(values[i])
     return stats
@@ -535,10 +543,10 @@ def gauss_blur(alls, sd = 4):
         new = new + values[sd:len(values) - sd]
     return new
 
-def fill_up(function, xran):
+def fill_up(function, xran, step_mult=1):
     """Returns list of tuples of (x, y) values for function over domain xran (tuple)."""
     #stepsize nearest power of 10 to 1/10000th of range
-    step = 10**round(math.log((xran[1] - xran[0])/10000, 10))
+    step = step_mult*10**math.floor(math.log((xran[1] - xran[0])/10000, 10))
     x= xran[0]
     fx = function(x)
     values = [(x, fx)]
@@ -552,7 +560,6 @@ def fill_up(function, xran):
         except ZeroDivisionError:
             pass
         x += step
-
     return values
 
 def extract_vals(box_list):
@@ -565,7 +572,7 @@ def extract_vals(box_list):
             pass
     return vals
 
-def val_compare(test_list, corr_list):
+def val_compare(test_list, corr_list, tol=1):
     """Return score out of one to how well test_list values match corr_list values.
 
     Uses square root of fractional difference.
@@ -573,13 +580,12 @@ def val_compare(test_list, corr_list):
     score = 0
     for test, corr in zip(test_list, corr_list):
 
-        gap =  corr - test
-        add =  1 - math.sqrt(abs(gap/corr))
-        #limit score to be between 0 and 1
-        if add > 1:
-            add = 1
-        if add < 0:
+        gap =  abs(corr - test)
+        add =  1
+        if gap > 2*tol:
             add = 0
+        elif gap > tol:
+            add = 0.5
 
         score += add
 
@@ -589,8 +595,25 @@ def val_compare(test_list, corr_list):
         #if list empty, zero score
         return 0
 
+def val_compare2(test_list, corr_list):
+    """Return score out of one to how well test_list values match corr_list values (exactly).
+
+    Uses square root of fractional difference.
+    """
+    score = 0
+    for test, corr in zip(test_list, corr_list):
+
+        if test == corr:
+            score += 1
+
+    try:
+        return score/len(corr_list)
+    except ZeroDivisionError:
+        #if list empty, zero score
+        return 0
+
 def least_squares(values, function):
-    """Return R^2 values for least squares test of values against function""".
+    """Return R^2 values for least squares test of values against function"""
 
     unzipped = zip(*values)
     x = unzipped[0]
@@ -605,15 +628,15 @@ def least_squares(values, function):
     regscore = round(1 - sumres/sumsq, 4)
     return regscore if regscore>0 else 0
 
-def find_compare(point, values):
+def find_compare(point, values, tolx=0.1, toly=0.1):
     """Find if any point if values is close enough to point, and return val_compare score."""
     x1, y1 = point
     xfound = 0
     yfound = 0
     for x2,y2 in values:
         #10% fractional difference
-        testx = abs((x2-x1)/x1) <= 0.1
-        testy = abs((y2-y1)/y1) <= 0.1
+        testx = abs((x2-x1)) <= tolx
+        testy = abs((y2-y1)) <= toly
         if testx and testy:
             return (val_compare([x2], [x1]) + val_compare([y2], [y1]))/2
     return 0
@@ -736,8 +759,11 @@ class graph_sketcher_1(graph_form):
     #colour setup
     error_red = "rgb(207, 84, 84)"
     draw_colour = "rgb(214, 106, 72)"
+    x_circle = "#336888"
+    y_circle = "#D69648"
+    stat_circle = "#339664"
 
-    def canvas_mouse_move (self, x, y, **event_args):
+    def canvas_mouse_move(self, x, y, **event_args):
         if self.first == False:
             xy = self.graph.find_xy(x, y)
 
@@ -747,20 +773,22 @@ class graph_sketcher_1(graph_form):
                 self.newvalues.append(xy)
             self.lbl_cord.text = "({0}, {1})".format(num_string(xy[0]), num_string(xy[1]))
 
-    def canvas_mouse_up (self, x, y, button, **event_args):
+    def canvas_mouse_up(self, x, y, button, **event_args):
         self.mousedown = False
         self.canvas.close_path()
         self.mousedown = False
         self.all.append(self.newvalues)
         self.newvalues = []
 
-    def canvas_mouse_leave (self, x, y,  **event_args):
+    def canvas_mouse_leave(self, x, y,  **event_args):
         self.mousedown = False
         self.all.append(self.newvalues)
         self.newvalues = []
 
-    def canvas_mouse_down (self, x, y, button, **event_args):
+    def canvas_mouse_down(self, x, y, button, **event_args):
         self.mousedown = True
+        if self.submitted and button == 0:
+            self.btn_clear_click()
         self.canvas.reset_transform()
         self.canvas.move_to(x,y)
         self.canvas.stroke_style = self.draw_colour
@@ -770,22 +798,31 @@ class graph_sketcher_1(graph_form):
         xy = self.graph.find_xy(x, y)
         self.newvalues.append(xy)
 
-    def btn_clear_click (self, **event_args):
+    def btn_clear_click(self, **event_args):
         draw.reset2(self.canvas, 1)
         draw.clear_canvas(self.canvas, "#fff")
         self.newvalues = []
         self.all = []
-        self.graph.func(self.startvals)
+
         self.lbl_mark.text = ""
         self.lbl_mark.background = "#fff"
 
         self.graph.axes_enabled = True
-        self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
+        if self.preplot:
+            self.graph.func(self.prevalues)
+            self.graph.plot(colour = "#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
+        else:
+            self.graph.func(self.startvals)
+            self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
 
+        self.submitted = False
 
     def check(self):
+        tolx  = 8/self.graph.xu
+        toly = 8/self.graph.yu
 
-        score = least_squares(self.newvalues, self.correct_function)
+        regscore = least_squares(self.newvalues, self.correct_function)
+        score = 0
         check_total = 1
 
         corr_x_stat = []
@@ -798,13 +835,15 @@ class graph_sketcher_1(graph_form):
             test_x_stat = zip(*self.teststats)[0]
             test_y_stat = zip(*self.teststats)[1]
 
-        score += val_compare(self.test_x_ints, self.corr_x_ints) + val_compare(self.test_y_ints, self.corr_y_ints)
-        score += val_compare(test_x_stat, corr_x_stat) + val_compare(test_y_stat, corr_y_stat)
-
+        score += val_compare(self.test_x_ints, self.corr_x_ints, tol=tolx) + val_compare(self.test_y_ints, self.corr_y_ints, tol=toly)
+        score += val_compare(test_x_stat, corr_x_stat, tol=tolx) + val_compare(test_y_stat, corr_y_stat, tol=toly)
+        print "regression = {}".format(regscore*100)
+        print "point hits = {}".format(score*100/4.0)
+        score += regscore
         if len(self.special_points)>0:
             check_total += len(self.special_points)
             for point in self.special_points:
-                score += find_compare(point, self.newvalues)
+                score += find_compare(point, self.newvalues, tolx=tolx, toly=toly)
 
 
         if len(self.corrstats)>0:
@@ -821,18 +860,22 @@ class graph_sketcher_1(graph_form):
 
     def btn_submit_click(self, **event_args):
         if len(self.all) > 0:
-
+            self.submitted = True
+            draw.clear_canvas(self.canvas, "#fff")
+            if self.preplot:
+                self.graph.func(self.prevalues)
+                self.graph.plot(colour = "#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
             self.newvalues = gauss_blur(self.all)
 
-            draw.clear_canvas(self.canvas, "#fff")
+
             self.graph.func(self.newvalues)
             self.graph.axes_enabled = True
             self.graph.plot(colour = self.draw_colour, xmarker = self.xmarker, ymarker = self.ymarker)
 
-            tolx  = 100/self.graph.xu
-            toly = 100/self.graph.yu
+            tolx  = 50/self.graph.xu
+            toly = 50/self.graph.yu
 
-            self.teststats = find_stationary(self.newvalues, tol = toly)
+            self.teststats = find_stationary(self.newvalues, toly=toly, tolx=tolx)
             self.test_x_ints = find_intersecs(self.newvalues, tol = toly, x = True)
             self.test_y_ints = find_intersecs(self.newvalues, tol = tolx, y = True)
 
@@ -843,16 +886,20 @@ class graph_sketcher_1(graph_form):
             if len(self.corrstats) != len(self.teststats):
                 self.lbl_mark.text += "Wrong number of stationary points"
                 self.lbl_mark.background = self.error_red
+                self.graph.func(self.newvalues)
+                self.graph.circle_points(self.teststats, self.stat_circle, pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
                 numbers = False
 
             if len(self.corr_x_ints) != len(self.test_x_ints):
                 self.lbl_mark.text += "\nWrong number of x intersections"
                 self.lbl_mark.background = self.error_red
+                self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), self.x_circle)
                 numbers = False
 
             if len(self.corr_y_ints) != len(self.test_y_ints):
                 self.lbl_mark.text += "\nWrong number of y intersections"
                 self.lbl_mark.background = self.error_red
+                self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointoffset = len(self.test_x_ints))
                 numbers = False
 
             if numbers:
@@ -881,10 +928,13 @@ class graph_sketcher_1(graph_form):
                 if xquads or yquads or statquads:
                     self.lbl_mark.background = self.error_red
                     if xquads:
+                        self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), self.x_circle)
                         self.lbl_mark.text += "\nWrong sign for x Intersection(s)"
                     if yquads:
+                        self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointoffset = len(self.test_x_ints))
                         self.lbl_mark.text += "\nWrong sign for y Intersection(s)"
                     if statquads:
+                        self.graph.circle_points(self.teststats, self.stat_circle, pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
                         self.lbl_mark.text += "\nStationary point(s) in wrong quadrant"
                 else:
                     score = self.check()
@@ -910,14 +960,14 @@ class graph_sketcher_1(graph_form):
         canvas = self.canvas
 
         if self.first:
-            self.values = fill_up(self.correct_function, self.xran)
+            self.values = fill_up(self.correct_function, self.xran, step_mult=100)
             self.preplot = True
             try:
-                self.prevalues = fill_up(self.pre_plot_function, self.xran)
+                self.prevalues = fill_up(self.pre_plot_function, self.xran, step_mult=100)
                 self.graph = graph_plot(canvas, self.prevalues)
             except AttributeError:
                 self.preplot = False
-                self.graph = graph_plot(canvas, self.values)
+                self.graph = graph_plot(canvas, self.startvals)
 
             self.graph.axes_enabled = True
             if self.set_xrange != [None, None]:
@@ -928,16 +978,16 @@ class graph_sketcher_1(graph_form):
             self.graph.ylabel = self.ylabel
 
             if self.preplot:
-                self.graph.plot(colour = "#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
+                self.graph.plot(colour="#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
             else:
-                self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
+                self.graph.plot(colour="#fff", xmarker=self.xmarker, ymarker=self.ymarker)
 
-            tolx  = 100/self.graph.xu
-            toly = 100/self.graph.yu
+            tolx  = 50/self.graph.xu
+            toly = 50/self.graph.yu
 
-            self.corrstats = find_stationary(self.values, tol = toly)
-            self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
-            self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
+            # self.corrstats = find_stationary(self.values, tol = toly)
+            # self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
+            # self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
 
             print self.corr_x_ints
             print "\n"*3
@@ -984,7 +1034,9 @@ class graph_sketcher_1(graph_form):
 
         self.imp_settings(sets)
         self.lbl_func.text = self.func_desc
-
+        self.corrstats = sets._stationaries
+        self.corr_x_ints = sets._x_intcpts
+        self.corr_y_ints = sets._y_intcpts
         self.mousedown = False
 
         self.first = True
@@ -992,6 +1044,7 @@ class graph_sketcher_1(graph_form):
         self.newvalues = []
         self.startvals = [(-0.01,-0.01),(0.01,0.01)]
         self.all = []
+        self.submitted = False
 
 class graph_sketcher_2(graph_form):
     """Rough sketch based graph sketcher. Subclass of graph_form.
@@ -1004,7 +1057,7 @@ class graph_sketcher_2(graph_form):
     stat_circle = "#339664"
 
 
-    def canvas_mouse_move (self, x, y, **event_args):
+    def canvas_mouse_move(self, x, y, **event_args):
 
         if self.mousedown:
             xy = self.graph.find_xy(x, y)
@@ -1013,17 +1066,18 @@ class graph_sketcher_2(graph_form):
             self.canvas.stroke()
 
 
-    def canvas_mouse_up (self, x, y, button, **event_args):
+    def canvas_mouse_up(self, x, y, button, **event_args):
         self.mousedown = False
         self.canvas.close_path()
         self.all.append(self.newvalues)
         self.newvalues = []
 
-    def canvas_mouse_leave (self, x, y,  **event_args):
+    def canvas_mouse_leave(self, x, y,  **event_args):
         self.mousedown = False
 
-    def canvas_mouse_down (self, x, y, button, **event_args):
-
+    def canvas_mouse_down(self, x, y, button, **event_args):
+        if self.submitted and button == 0:
+            self.btn_clear_click()
         self.mousedown = True
         self.canvas.reset_transform()
         self.canvas.move_to(x,y)
@@ -1034,7 +1088,7 @@ class graph_sketcher_2(graph_form):
         xy = self.graph.find_xy(x, y)
         self.newvalues.append(xy)
 
-    def btn_clear_click (self, **event_args):
+    def btn_clear_click(self, **event_args):
         draw.clear_canvas(self.canvas, "#fff")
         self.graph.func(self.startvals)
 
@@ -1047,7 +1101,7 @@ class graph_sketcher_2(graph_form):
         self.lbl_mark.background = "#fff"
 
         self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
-
+        self.submitted = False
 
 
     def btn_check_click(self, **event_args):
@@ -1067,8 +1121,8 @@ class graph_sketcher_2(graph_form):
         ent_x_stat = extract_vals(self.x_stat_box)
         ent_y_stat = extract_vals(self.y_stat_box)
 
-        score = val_compare(ent_x_ints, corr_x_ints) + val_compare(ent_y_ints, corr_y_ints)
-        score += val_compare(ent_x_stat, corr_x_stat) + val_compare(ent_y_stat, corr_y_stat)
+        score = val_compare2(ent_x_ints, corr_x_ints) + val_compare2(ent_y_ints, corr_y_ints)
+        score += val_compare2(ent_x_stat, corr_x_stat) + val_compare2(ent_y_stat, corr_y_stat)
 
         check_total = 0
         if len(self.corrstats)>0:
@@ -1104,12 +1158,12 @@ class graph_sketcher_2(graph_form):
         self.graph.circle_points(self.teststats, self.stat_circle, pointlabels = statlabs, pointoffset = len(xlabs) + len(ylabs))
 
     def drawn_process(self):
-        tolx  = 100/self.graph.xu
-        toly = 100/self.graph.yu
+        tolx  = 50/self.graph.xu
+        toly = 50/self.graph.yu
 
-        self.teststats = find_stationary(self.newvalues, tol = toly)
-        self.test_x_ints = find_intersecs(self.newvalues, tol = toly, x = True)
-        self.test_y_ints = find_intersecs(self.newvalues, tol = tolx, y = True)
+        self.teststats = find_stationary(self.newvalues, toly=toly, tolx=tolx)
+        self.test_x_ints = find_intersecs(self.newvalues, tol=toly, x = True)
+        self.test_y_ints = find_intersecs(self.newvalues, tol=tolx, y = True)
 
         self.lbl_mark.text = ""
         numbers = True
@@ -1168,44 +1222,46 @@ class graph_sketcher_2(graph_form):
                 if statquads:
                     self.lbl_mark.text += "\nStationary point(s) in wrong quadrant"
 
+            else:
+                self.btn_check.visible = True
+                if len(self.test_x_ints)>0:
+                    int_label = Label(text = "x Intersections", bold = True)
+                    self.grid_x_int.add_component(int_label)
 
-            if len(self.test_x_ints)>0:
-                int_label = Label(text = "x Intersections", bold = True)
-                self.grid_x_int.add_component(int_label)
-
-                for i in range(len(self.test_x_ints)):
-                    box = TextBox(placeholder = "{}".format(chr(i+65)))
-                    box.set_event_handler("pressed_enter", self.btn_check_click)
-                    self.x_int_box.append(box)
-                    self.grid_x_int.add_component(box, row = chr(i+65))
+                    for i in range(len(self.test_x_ints)):
+                        box = TextBox(placeholder = "{}".format(chr(i+65)))
+                        box.set_event_handler("pressed_enter", self.btn_check_click)
+                        self.x_int_box.append(box)
+                        self.grid_x_int.add_component(box, row = chr(i+65))
 
 
-            if len(self.test_y_ints)>0:
-                int_label = Label(text = "y Intersections", bold = True)
-                self.grid_y_int.add_component(int_label)
+                if len(self.test_y_ints)>0:
+                    int_label = Label(text = "y Intersections", bold = True)
+                    self.grid_y_int.add_component(int_label)
 
-                for i in range(len(self.test_y_ints)):
-                    box = TextBox(placeholder = "{}".format(chr(i+65 + len(self.test_x_ints))))
-                    box.set_event_handler("pressed_enter", self.btn_check_click)
-                    self.y_int_box.append(box)
-                    self.grid_y_int.add_component(box, row = chr(i+65))
+                    for i in range(len(self.test_y_ints)):
+                        box = TextBox(placeholder = "{}".format(chr(i+65 + len(self.test_x_ints))))
+                        box.set_event_handler("pressed_enter", self.btn_check_click)
+                        self.y_int_box.append(box)
+                        self.grid_y_int.add_component(box, row = chr(i+65))
 
-            if len(self.teststats)>0:
-                int_label = Label(text = "Stationary points", bold = True)
-                self.grid_stat.add_component(int_label)
+                if len(self.teststats)>0:
+                    int_label = Label(text = "Stationary points", bold = True)
+                    self.grid_stat.add_component(int_label)
 
-                for i in range(len(self.teststats)):
-                    box_x = TextBox(placeholder = "{0}: {1}".format(chr(i+65 + len(self.test_x_ints) + len(self.test_y_ints)), self.xlabel))
-                    box_y = TextBox(placeholder = "{0}: {1}".format(chr(i+65+ len(self.test_x_ints) + len(self.test_y_ints)), self.ylabel))
-                    box_x.set_event_handler("pressed_enter", self.btn_check_click)
-                    box_y.set_event_handler("pressed_enter", self.btn_check_click)
-                    self.x_stat_box.append(box_x)
-                    self.y_stat_box.append(box_y)
-                    self.grid_stat.add_component(box_x, row = chr(i+65),  col_xs=0, width_xs=5)
-                    self.grid_stat.add_component(box_y,row = chr(i+65),  col_xs=6, width_xs=5)
+                    for i in range(len(self.teststats)):
+                        box_x = TextBox(placeholder = "{0}: {1}".format(chr(i+65 + len(self.test_x_ints) + len(self.test_y_ints)), self.xlabel))
+                        box_y = TextBox(placeholder = "{0}: {1}".format(chr(i+65+ len(self.test_x_ints) + len(self.test_y_ints)), self.ylabel))
+                        box_x.set_event_handler("pressed_enter", self.btn_check_click)
+                        box_y.set_event_handler("pressed_enter", self.btn_check_click)
+                        self.x_stat_box.append(box_x)
+                        self.y_stat_box.append(box_y)
+                        self.grid_stat.add_component(box_x, row = chr(i+65),  col_xs=0, width_xs=5)
+                        self.grid_stat.add_component(box_y,row = chr(i+65),  col_xs=6, width_xs=5)
 
 
     def btn_submit_click(self, **event_args):
+        self.submitted = True
         self.grid_stat.clear()
         self.grid_x_int.clear()
         self.grid_y_int.clear()
@@ -1225,7 +1281,7 @@ class graph_sketcher_2(graph_form):
             self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointoffset = len(self.test_x_ints))
             self.graph.circle_points(self.teststats, self.stat_circle, pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
 
-    def timer_tick (self, **event_args):
+    def timer_tick(self, **event_args):
         canvas = self.canvas
 
         if self.first:
@@ -1240,14 +1296,14 @@ class graph_sketcher_2(graph_form):
             self.graph.xlabel = self.xlabel
             self.graph.ylabel = self.ylabel
             self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
-            self.values = fill_up(self.correct_function, self.xran)
+            #self.values = fill_up(self.correct_function, self.xran)
 
-            tolx  = 100/self.graph.xu
-            toly = 100/self.graph.yu
+            tolx  = 50/self.graph.xu
+            toly = 50/self.graph.yu
 
-            self.corrstats = find_stationary(self.values, tol = toly)
-            self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
-            self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
+            #self.corrstats = find_stationary(self.values, tol = toly)
+            #self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
+            #self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
 
             print self.corr_x_ints
             print "\n"*3
@@ -1290,7 +1346,7 @@ class graph_sketcher_2(graph_form):
         form.add_component(self.grid_y_int, row = "D", width_xs = 3, col_xs = 3)
         form.add_component(self.grid_stat, row = "D", width_xs = 4, col_xs = 6)
 
-        self.btn_check = Button(text = "Check")
+        self.btn_check = Button(text="Check", visible=False)
         self.btn_check.set_event_handler("click", self.btn_check_click)
         form.add_component(self.btn_check, row = "D", width_xs = 2, col_xs = 10)
 
@@ -1303,7 +1359,11 @@ class graph_sketcher_2(graph_form):
 
         self.imp_settings(sets)
         self.lbl_func.text = self.func_desc
-
+        if hasattr(sets, '_show_mark'):
+            self.lbl_mark.visible = sets._show_mark
+        self.corrstats = sorted(sets._stationaries,key=lambda x: x[0])
+        self.corr_x_ints = sorted(sets._x_intcpts)
+        self.corr_y_ints = sorted(sets._y_intcpts)
         self.mousedown = False
 
         self.first = True
@@ -1311,3 +1371,4 @@ class graph_sketcher_2(graph_form):
         self.newvalues = []
         self.startvals = [(-0.01,-0.01),(0.01,0.01)]
         self.all = []
+        self.submitted = False
