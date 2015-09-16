@@ -1,3 +1,16 @@
+# Copyright 2015 Seyon Sivarajah
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
 from anvil import *
 import physics
 import draw
@@ -9,10 +22,10 @@ class Form1(Form1Template):
     floor_height = 0.05
     arrow_scale = 0.05
     linewidth = 0.01
-    def txt_change (self, **event_args):
+    def txt_change(self, **event_args):
         self.init_ball()
 
-    def canvas_mouse_move (self, x, y, **event_args):
+    def canvas_mouse_move(self, x, y, **event_args):
         # This method is called when the mouse cursor moves over this component
         #record mouse pos
         self.mouse.x = x/self.xu
@@ -29,11 +42,11 @@ class Form1(Form1Template):
 
 
 
-    def canvas_mouse_up (self, x, y, button, **event_args):
+    def canvas_mouse_up(self, x, y, button, **event_args):
         # This method is called when a mouse button is released on this component
         self.mousedown = False
 
-    def canvas_mouse_down (self, x, y, button, **event_args):
+    def canvas_mouse_down(self, x, y, button, **event_args):
         # This method is called when a mouse button is pressed on this component
         self.mouse.x = x/self.xu
         self.mouse.y = (self.ch-y)/self.xu
@@ -42,10 +55,10 @@ class Form1(Form1Template):
         if (0.9*self.arrow_scale*self.ball.vel + self.ball.pos - self.mouse).mag()<= self.ball.radius/3 and self.reset:
             self.mousedown= True
 
-    def btn_path_click (self, **event_args):
+    def btn_path_click(self, **event_args):
         self.paths= []
 
-    def btn_run_click (self, **event_args):
+    def btn_run_click(self, **event_args):
         # This method is called when the button is clicked
         if not self.running:
             if self.reset:
@@ -64,7 +77,7 @@ class Form1(Form1Template):
         for box in self.param_boxes:
             box.enabled = self.reset
 
-    def btn_reset_click (self, **event_args):
+    def btn_reset_click(self, **event_args):
         #This method is called when the button is clicked
         self.running = False
         self.init_ball()
@@ -77,7 +90,7 @@ class Form1(Form1Template):
         for box in self.param_boxes:
             box.enabled = self.reset
 
-    def timer_tick (self, **event_args):
+    def timer_tick(self, **event_args):
         # This method is called Every [interval] seconds
         dt = self.dt
         canvas = self.canvas
@@ -138,10 +151,7 @@ class Form1(Form1Template):
             ball = self.ball
             #velocity vector
             canvas.translate(ball.pos.x, ball.pos.y)
-            if ball.vel.y>0:
-                canvas.rotate(ball.vel.phi())
-            else:
-                canvas.rotate(-ball.vel.phi())
+            canvas.rotate(ball.vel.phi())
             draw.arrow(canvas, ball.vel.mag()*self.arrow_scale, 4*self.linewidth)
             canvas.fill_style = "#49902a"
             canvas.fill()
@@ -150,6 +160,7 @@ class Form1(Form1Template):
         #dashes
         if not self.running:
             draw.paths(canvas,self.paths, self.linewidth, "#000")
+            
     def init_ball(self):
         xsp = 0
         ysp = 0

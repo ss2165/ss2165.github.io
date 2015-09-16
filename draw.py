@@ -11,45 +11,81 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Anvil service module for drawing objects and methods, used with the canvas component.
 
+Classes:
+slider -- canvas based slider object for anvil apps.
+
+Functions:
+reset2 -- scale canvas and move origin to bottom left.
+clear_canvas -- clear the canvas.
+border -- draw border on canvas.
+eq_triangle -- draw equilateral triangle.
+circle -- draw a circle.
+arrow -- draw standard arrow.
+polygon -- draw a regular polygon.
+dashed_line -- draw a dashed line.
+paths -- draw dashed lines joining list of points.
+vel_arrows -- draw velocity arrow on ball object.
+cart_arrows -- draw cartesian component arrows of a vector.
+wavelength_to_rgb -- convert wavelength to rgb values.
+"""
 import math
 
 class slider():
-    """Canvas slider object
+    """Anvil Canvas slider object.
 
     Create a slider between mini and maxi with indicator of given colour which can take values in steps of stepsize.
     The starting position is given by start.
     Current value is given in the value attribute.
-    Default colour is blue. Optional colour must be given in hex string form.
+    Default colour is blue (#318fdb). Optional colour must be given in hex string form.
     Minimum canvas height 40px for standard, 50px with indicators.
 
     Attributes:
-        mini --
-        maxi --
-        stepsize --
-        value --
-        mousedown --
-        indicator --
-        maxmin --
-        base_colour --
-        enabled --
+    mini (float)-- minimum value of slider.
+    maxi (float)-- maximum values of slider.
+    stepsize (float)-- steps to move slider by.
+    value (float)-- user accesible, current value of slider.
+    mousedown (bool)-- is mouse pressed on slider.
+    indicator (bool)-- show value under slider.
+    maxmin (bool)-- show maximum and minimum values.
+    base_colour (string)-- hex colour string of slider.
+    enabled (bool)-- is interaction enabled.
+
+    Methods:
+    draw -- draw slider on canvas.
+    map_mouse -- map canvas mouse events to slider object mouse events.
+    mouse_down -- move slider to click position.
+    mouse_move -- move slider with mouse if mouse down.
+    mouse_up -- stop interaction when mouse up.
+    mouse_leave -- stop mouse interaction when mouse leave.
 
     """
 
     default_colour = "#318fdb"
-    def __init__(self, canvas, mini, maxi, stepsize, start = 0, colour = default_colour, change_event = None):
+    def __init__(self, canvas, mini, maxi, stepsize, start = 0, colour = default_colour):
+        """Initialize slider object.
+
+        Parameters:
+        canvas (Canvas)-- anvil canvas component to draw on.
+        mini (float)-- minimum value of slider.
+        maxi (float)-- maximum values of slider.
+        stepsize (float)-- steps to move slider by.
+        start (float)-- value to start slider at.
+        colour (string)-- MUST BE HEX STRING colour of slider.
+        """
         if not mini <= start <= maxi:
             raise "Start value not within range specified."
         self.mini = mini
         self.maxi = maxi
         self.stepsize = stepsize
         self.canvas = canvas
-        self.change_event = change_event
 
         self.cw = canvas.get_width()
         self.ch = canvas.get_height()
 
         self.range = maxi - mini
+        #scale drawing by range of slider and canvas width
         self.scale = float(self.cw) / self.range
 
         self.value = start
@@ -62,36 +98,48 @@ class slider():
         self.indicator  = True
         self.maxmin = True
 
+        #size of grabber
         self.grabber_side =15
         self.enabled = True
 
+        #map canvas mouse events
         self.map_mouse()
+        #first draw
         self.draw()
 
     def draw(self):
         canvas = self.canvas
         self.cw = canvas.get_width()
         self.ch = canvas.get_height()
+        #reset canvas transforms
         reset2(self.canvas, 1)
         clear_canvas(canvas, "#fff")
+        #vertical placement of slider line, with top padding of 5 pixels.
         self.centre = self.ch - self.grabber_side/2 -5
         centre = self.centre
+        #slider text font
         font_size = 14
         font = "{0}px sans-serif".format(int(font_size))
 
+        #if maximum minimum labels enabled
         if self.maxmin:
             mini_str = "{}".format(repr(self.mini))
             maxi_str = "{}".format(repr(self.maxi))
 
+            #find text widths
             mini_size = canvas.measure_text(mini_str)
             maxi_size = canvas.measure_text(maxi_str)
+            #find the bigger text and store it in maxi_size
             if mini_size > maxi_size:
                 mini_size, maxi_size = maxi_size, mini_size
+            #set horizontal padding to maximum text size + 5
             self.horpad = maxi_size + 5
         else:
+            #default side padding of 10px
             self.horpad = 10
 
         horpad = self.horpad
+        #rescale with horizontal padding
         self.scale = (float(self.cw) - 2*horpad)/ self.range
 
         #line
@@ -106,12 +154,17 @@ class slider():
 
         #grabber
         grabber_side = self.grabber_side
+        #find centre of triangle in grabber
         triangle_centre = centre - grabber_side*(1+1/math.sqrt(3))/2
+        #draw triangle at value
         polygon(canvas, 3, grabber_side, (self.value - self.mini)*self.scale+ horpad, triangle_centre)
         canvas.fill_style = self.colour
         canvas.fill()
+        #reset transforms
         reset2(self.canvas, 1)
+        #draw square
         polygon(canvas, 4, grabber_side, (self.value - self.mini)*self.scale + horpad, centre)
+        #reduce shadow if mouse pressed
         canvas.shadow_blur = 2 if self.mousedown else 5
         canvas.shadow_color = "black"
         canvas.fill_style = self.colour
@@ -123,6 +176,7 @@ class slider():
             value_str = "{0}".format(repr(self.value))
 
             canvas.font = font
+            #measure text of value to centre it under grabber
             text_width = canvas.measure_text(value_str)
 
             canvas.fill_style = "#000"
@@ -193,10 +247,27 @@ class slider():
         self.mousedown = False
         self.draw()
 
+def reset2(canvas, xu):
+    """Custom canvas reset function. Scales to xu, and places origin at bottom left."""
+    canvas.reset_transform()
+    canvas.translate(0, canvas.get_height())
+    canvas.scale(xu,-xu)
 
+def clear_canvas(canvas, colour = "#fff"):
+    """Fill canvas with colour."""
+    canvas.fill_style= colour
+    canvas.fill_rect(0, 0, canvas.get_width(), canvas.get_height())
+
+def border(canvas, thickness, colour, xu=1):
+    """Draw border of thickness and colour on canvas which has been scaled by xu."""
+    canvas.begin_path()
+    canvas.line_width = thickness/xu
+    canvas.stroke_style = colour
+    canvas.stroke_rect(0, 0, canvas.get_width()/xu, canvas.get_height()/xu)
 
 def eq_triangle(canvas, side, x= 0, y= 0):
-    #draws upward equilateral triangle with bottom left corner at origin
+    """Draw upward equilateral triangle with bottom left corner at x, y."""
+
     canvas.translate(x,y)
     canvas.begin_path()
     canvas.move_to(0,0)
@@ -206,29 +277,41 @@ def eq_triangle(canvas, side, x= 0, y= 0):
     canvas.translate(-x,-y)
 
 def circle(canvas, radius, x= 0, y= 0):
-    #draw circle of radius
+    """Draw circle of radius at x, y."""
+
     canvas.begin_path()
     canvas.arc(x, y, float(radius), 0, 2*math.pi)
     canvas.close_path()
 
 def arrow(canvas, length, width, x= 0, y= 0):
-    #draws horizontal arrow of length and width starting at middle of base
+    """Draw horizontal arrow of length and width starting at middle of base at x,y."""
+    #move to corner
     canvas.translate(x,y+ width/2)
     canvas.begin_path()
     canvas.move_to(0,0)
+    #horizontal line
     canvas.line_to(0.8*length, 0)
+    #up on arrow head
     canvas.line_to(0.8*length, 1.5*width/2)
+    #to tip
     canvas.line_to(length, -width/2)
+    #back
     canvas.line_to(0.8*length, -3.5*width/2)
+    #finish head
     canvas.line_to(0.8*length, -width)
+    #back to base
     canvas.line_to(0, -width)
     canvas.close_path()
+    #negate translation
     canvas.translate(-x,-y-width/2)
 
 def polygon(canvas, sides, length, x= 0, y= 0):
+    """Draw regular polygon with sides of length, at x, y."""
+
     canvas.translate(x,y)
     N = sides
     l = length
+    #interior angle
     a = 2*math.pi/N
     #distance from centre to middle of one side
     d = float(l)*math.sqrt((1+math.cos(a))/(1-math.cos(a)))/2
@@ -241,12 +324,20 @@ def polygon(canvas, sides, length, x= 0, y= 0):
     canvas.translate(-x,-y)
 
 def dashed_line(canvas, dashlength, x2, y2, x=0, y= 0):
+    """Draw dashed line from x, y to x2, y2, each segment of length dashlength.
+
+    Emulates "line_to" behaviour of canvas, i.e does not begin or close path.
+    """
+    #total length of line
     length = math.sqrt((x2-x)**2 + (y2-y)**2)
+    #number of dashes.
     no = int(length/dashlength)
     if no>0:
+        #x length
         dx= float(x2-x)/no
+        #y  length
         dy = float(y2-y)/no
-
+        #fraction of segment to draw (dash size)
         factor = 0.8
 
         canvas.move_to(x,y)
@@ -258,7 +349,11 @@ def dashed_line(canvas, dashlength, x2, y2, x=0, y= 0):
         pass
 
 def paths(canvas, paths, thickness, colour):
+    """Draw dashed line of colour and thickness joining list of paths.
+
+    Each list in paths must be a list of physics.vector3 types."""
     canvas.begin_path()
+    #for each path
     for path in paths:
         if len(path)>2:
             for i in range(len(path)-1):
@@ -272,6 +367,8 @@ def paths(canvas, paths, thickness, colour):
     canvas.stroke()
 
 def vel_arrows(canvas, ball, line_width, arrow_scale = 0.15):
+    """Draw x, y components and velocity arrow of physics.ball object."""
+    #arrow_scale converts velocity values to pixels.
     #x component
     arrow(canvas, ball.vel.x*arrow_scale, 2*line_width, ball.pos.x, ball.pos.y)
     canvas.fill_style = "#333333"
@@ -280,32 +377,32 @@ def vel_arrows(canvas, ball, line_width, arrow_scale = 0.15):
     #y component
     canvas.translate(ball.pos.x, ball.pos.y)
     canvas.rotate(math.pi/2)
+    #use arrow function
     arrow(canvas, ball.vel.y*arrow_scale, 2*line_width)
     canvas.fill()
     canvas.rotate(-math.pi/2)
 
     #velocity vector
-
-    if ball.vel.y>0:
-        canvas.rotate(ball.vel.phi())
-    else:
-        canvas.rotate(-ball.vel.phi())
+    canvas.rotate(ball.vel.phi())
     arrow(canvas, ball.vel.mag()*arrow_scale, 4*line_width)
     canvas.fill_style = "#49902a"
     canvas.fill()
 
 
 def cart_arrows(canvas, vector, line_width, arrow_scale = 0.15, colours = {'x':"#444242",'y':"#444242",'z':"#444242"}, x= 0, y=0 ):
+    """Draw cartesian components of vector (physics.vector3 type) with colours."""
     #z component
     canvas.shadow_blur = 4
     canvas.translate(x, y)
     canvas.rotate(math.pi/6 + math.pi)
     canvas.scale(10*line_width, 10*line_width)
     canvas.begin_path()
+    #dashed axes
     dashed_line(canvas, 0.2, 1,0)
     canvas.line_width = 0.06
     canvas.stroke()
     canvas.scale(0.1/line_width, 0.1/line_width)
+    #component arrow
     arrow(canvas, vector.z*arrow_scale, 1.5*line_width)
     canvas.fill_style = colours['z']
     canvas.fill()
@@ -338,38 +435,23 @@ def cart_arrows(canvas, vector, line_width, arrow_scale = 0.15, colours = {'x':"
     canvas.translate(-x,-y)
 
 
-def btn_run_click(self):
-    #standard switching run button
-    if not self.running:
-        self.running  = True
-        self.reset = False
-        self.btn_run.text = "Pause"
+# def btn_run_click(self):
+#     #standard switching run button
+#     if not self.running:
+#         self.running  = True
+#         self.reset = False
+#         self.btn_run.text = "Pause"
+#
+#     else:
+#         self.running = False
+#         self.btn_run.text = "Run"
+#
+# def btn_reset_click (self):
+#     #called when reset button is clicked
+#     self.running = False
+#     self.reset = True
+#     self.btn_run.text = "Run"
 
-    else:
-        self.running = False
-        self.btn_run.text = "Run"
-
-def btn_reset_click (self):
-    #called when reset button is clicked
-    self.running = False
-    self.reset = True
-    self.btn_run.text = "Run"
-
-def reset2(canvas, xu):
-    #custom reset function, scales to metres (xu = pixels per m), and places origin at bottom left
-    canvas.reset_transform()
-    canvas.translate(0, canvas.get_height())
-    canvas.scale(xu,-xu)
-
-def clear_canvas(canvas, colour = "#fff"):
-    canvas.fill_style= colour
-    canvas.fill_rect(0, 0, canvas.get_width(), canvas.get_height())
-
-def border(canvas, thickness, colour, xu):
-    canvas.begin_path()
-    canvas.line_width = thickness/xu
-    canvas.stroke_style = colour
-    canvas.stroke_rect(0, 0, canvas.get_width()/xu, canvas.get_height()/xu)
 
 def wavelength_to_rgb(wavelength, gamma=0.8):
     '''This converts a given wavelength of light to an

@@ -1,0 +1,247 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module graphs</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>graphs</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/seyon/google%20drive/isaac/anvil/ss2165.github.io/graphs.py">c:\users\seyon\google drive\isaac\anvil\ss2165.github.io\graphs.py</a></font></td></tr></table>
+    <p><tt>Anvil&nbsp;service&nbsp;module&nbsp;for&nbsp;graph&nbsp;plotting&nbsp;and&nbsp;function&nbsp;processing.<br>
+&nbsp;<br>
+Classes:<br>
+<a href="#graph_plot">graph_plot</a>&nbsp;--&nbsp;plots&nbsp;a&nbsp;given&nbsp;function&nbsp;on&nbsp;an&nbsp;Anvil&nbsp;canvas.<br>
+<a href="#graph_form">graph_form</a>&nbsp;--&nbsp;base&nbsp;class&nbsp;for&nbsp;sketcher&nbsp;forms<br>
+<a href="#graph_sketcher_1">graph_sketcher_1</a>&nbsp;&amp;&nbsp;<a href="#graph_sketcher_2">graph_sketcher_2</a>&nbsp;--&nbsp;emulate&nbsp;Anvil&nbsp;forms&nbsp;for&nbsp;the&nbsp;two&nbsp;forms&nbsp;of&nbsp;graph&nbsp;sketching&nbsp;app&nbsp;supported.<br>
+&nbsp;<br>
+Functions:<br>
+num_string&nbsp;--&nbsp;return&nbsp;a&nbsp;sensibly&nbsp;formatted&nbsp;string&nbsp;of&nbsp;inputed&nbsp;float.<br>
+find_intersecs&nbsp;--&nbsp;find&nbsp;x&nbsp;or&nbsp;y&nbsp;intersections&nbsp;of&nbsp;inputed&nbsp;list&nbsp;of&nbsp;values.<br>
+find_stationary&nbsp;--&nbsp;&nbsp;find&nbsp;maxima&nbsp;and&nbsp;minima&nbsp;in&nbsp;inputed&nbsp;list&nbsp;of&nbsp;values.<br>
+gauss_blur&nbsp;--&nbsp;smooth&nbsp;given&nbsp;function.<br>
+fill_up&nbsp;--&nbsp;generate&nbsp;list&nbsp;of&nbsp;values&nbsp;for&nbsp;given&nbsp;function.<br>
+extract_vals&nbsp;--&nbsp;generates&nbsp;list&nbsp;of&nbsp;floats&nbsp;from&nbsp;list&nbsp;of&nbsp;Anvil&nbsp;input&nbsp;boxes.<br>
+val_compare&nbsp;--&nbsp;compare&nbsp;list&nbsp;of&nbsp;test&nbsp;values&nbsp;to&nbsp;correct&nbsp;values,&nbsp;return&nbsp;score.<br>
+least_squares&nbsp;--&nbsp;compute&nbsp;R^2&nbsp;values&nbsp;of&nbsp;input&nbsp;values&nbsp;with&nbsp;correct&nbsp;function.<br>
+find_compare&nbsp;--&nbsp;find&nbsp;points&nbsp;in&nbsp;list&nbsp;of&nbsp;values,&nbsp;and&nbsp;val_compare&nbsp;if&nbsp;found.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="draw.html">draw</a><br>
+</td><td width="25%" valign=top><a href="math.html">math</a><br>
+</td><td width="25%" valign=top><a href="physics.html">physics</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="graphs.html#graph_form">graph_form</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="graphs.html#graph_sketcher_1">graph_sketcher_1</a>
+</font></dt><dt><font face="helvetica, arial"><a href="graphs.html#graph_sketcher_2">graph_sketcher_2</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="graphs.html#graph_plot">graph_plot</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="graph_form">class <strong>graph_form</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Base&nbsp;class&nbsp;for&nbsp;both&nbsp;graph&nbsp;sketcher&nbsp;forms.<br>
+&nbsp;<br>
+Methods:<br>
+imp_settings&nbsp;--&nbsp;read&nbsp;in&nbsp;settings&nbsp;from&nbsp;settings&nbsp;form.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="graph_form-imp_settings"><strong>imp_settings</strong></a>(self, sets)</dt><dd><tt>Read&nbsp;in&nbsp;settings&nbsp;from&nbsp;settings&nbsp;form,&nbsp;either&nbsp;graphical&nbsp;or&nbsp;code.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="graph_plot">class <strong>graph_plot</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Plots&nbsp;values&nbsp;(list&nbsp;of&nbsp;(x,y)&nbsp;tuples)&nbsp;on&nbsp;Anvil&nbsp;canvas.<br>
+&nbsp;<br>
+Attributes:<br>
+canvas&nbsp;(Canvas)&nbsp;--&nbsp;canvas&nbsp;to&nbsp;plot&nbsp;on<br>
+xrange&nbsp;(list)--&nbsp;x&nbsp;range&nbsp;to&nbsp;plot&nbsp;over<br>
+yrange&nbsp;(list)--&nbsp;y&nbsp;range&nbsp;to&nbsp;plot&nbsp;over<br>
+line_width&nbsp;(int)--&nbsp;plot&nbsp;line&nbsp;width<br>
+axes_enabled&nbsp;(bool)&nbsp;--&nbsp;whether&nbsp;to&nbsp;plot&nbsp;axes<br>
+gridlines_enabled&nbsp;(bool)&nbsp;--&nbsp;whether&nbsp;to&nbsp;plot&nbsp;gridlines<br>
+markers_enabled&nbsp;(bool)&nbsp;--&nbsp;whether&nbsp;to&nbsp;plot&nbsp;markers<br>
+xlabel&nbsp;(string)&nbsp;--&nbsp;x&nbsp;axis&nbsp;label<br>
+ylabel&nbsp;(string)&nbsp;--&nbsp;y&nbsp;axis&nbsp;label<br>
+xmarker&nbsp;(float)&nbsp;--&nbsp;stepsize&nbsp;in&nbsp;which&nbsp;to&nbsp;draw&nbsp;x&nbsp;gridlines&nbsp;and&nbsp;markers<br>
+ymarker&nbsp;(float)&nbsp;--&nbsp;stepsize&nbsp;in&nbsp;which&nbsp;to&nbsp;draw&nbsp;y&nbsp;gridlines&nbsp;and&nbsp;markers<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="graph_plot-__init__"><strong>__init__</strong></a>(self, canvas, values)</dt><dd><tt>Read&nbsp;in&nbsp;values&nbsp;to&nbsp;be&nbsp;plotted&nbsp;and&nbsp;declare&nbsp;variables.</tt></dd></dl>
+
+<dl><dt><a name="graph_plot-circle_points"><strong>circle_points</strong></a>(self, points, colour, pointlabels<font color="#909090">=None</font>, pointoffset<font color="#909090">=0</font>)</dt><dd><tt>Draws&nbsp;circles&nbsp;at&nbsp;given&nbsp;list&nbsp;of&nbsp;points&nbsp;on&nbsp;the&nbsp;plot.<br>
+&nbsp;<br>
+Arguments:<br>
+points&nbsp;(list)&nbsp;--&nbsp;list&nbsp;of&nbsp;tuples&nbsp;to&nbsp;draw&nbsp;circles&nbsp;at<br>
+colour&nbsp;(string)&nbsp;--&nbsp;colour&nbsp;of&nbsp;circles<br>
+pointlabels&nbsp;(list)&nbsp;--&nbsp;optional&nbsp;list&nbsp;of&nbsp;strings&nbsp;to&nbsp;label&nbsp;circles&nbsp;with<br>
+pointoffset&nbsp;(int)&nbsp;--&nbsp;set&nbsp;which&nbsp;letter&nbsp;of&nbsp;alphabet&nbsp;to&nbsp;start&nbsp;labelling&nbsp;at</tt></dd></dl>
+
+<dl><dt><a name="graph_plot-find_xy"><strong>find_xy</strong></a>(self, x, y)</dt><dd><tt>Returns&nbsp;corresponding&nbsp;(x,y)&nbsp;tuple&nbsp;on&nbsp;plot&nbsp;from&nbsp;x,&nbsp;y&nbsp;canvas&nbsp;values</tt></dd></dl>
+
+<dl><dt><a name="graph_plot-func"><strong>func</strong></a>(self, values)</dt><dd><tt>Read&nbsp;list&nbsp;of&nbsp;values&nbsp;in&nbsp;to&nbsp;x&nbsp;and&nbsp;fx&nbsp;attributes&nbsp;up&nbsp;to&nbsp;the&nbsp;resolution&nbsp;of&nbsp;the&nbsp;canvas.</tt></dd></dl>
+
+<dl><dt><a name="graph_plot-plot"><strong>plot</strong></a>(self, colour<font color="#909090">='#198dbf'</font>, xmarker<font color="#909090">=None</font>, ymarker<font color="#909090">=None</font>)</dt><dd><tt>Plot&nbsp;the&nbsp;function&nbsp;on&nbsp;the&nbsp;canvas.<br>
+&nbsp;<br>
+Arguments:<br>
+colour&nbsp;(string)&nbsp;--&nbsp;colour&nbsp;of&nbsp;line&nbsp;to&nbsp;plot&nbsp;in<br>
+xmarker&nbsp;(float)&nbsp;--&nbsp;optional,&nbsp;if&nbsp;specified&nbsp;sets&nbsp;x&nbsp;marker&nbsp;and&nbsp;gridline&nbsp;spacing.<br>
+ymarker&nbsp;(float)&nbsp;--&nbsp;optional,&nbsp;if&nbsp;specified&nbsp;sets&nbsp;y&nbsp;marker&nbsp;and&nbsp;gridline&nbsp;spacing.</tt></dd></dl>
+
+<dl><dt><a name="graph_plot-transform"><strong>transform</strong></a>(self)</dt><dd><tt>Transform&nbsp;and&nbsp;scale&nbsp;canvas&nbsp;such&nbsp;that&nbsp;raw&nbsp;x,y&nbsp;values&nbsp;can&nbsp;be&nbsp;used&nbsp;for&nbsp;plotting</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="graph_sketcher_1">class <strong>graph_sketcher_1</strong></a>(<a href="graphs.html#graph_form">graph_form</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Exact&nbsp;plot&nbsp;based&nbsp;graph&nbsp;sketcher.&nbsp;Subclass&nbsp;of&nbsp;<a href="#graph_form">graph_form</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="graph_sketcher_1-__init__"><strong>__init__</strong></a>(self, form)</dt><dd><tt>Import&nbsp;settings&nbsp;and&nbsp;initialize&nbsp;components.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-btn_clear_click"><strong>btn_clear_click</strong></a>(self, **event_args)</dt><dd><tt>Clear&nbsp;canvas&nbsp;and&nbsp;empty&nbsp;stored&nbsp;values&nbsp;when&nbsp;clear&nbsp;button&nbsp;clicked.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-btn_submit_click"><strong>btn_submit_click</strong></a>(self, **event_args)</dt><dd><tt>When&nbsp;submit&nbsp;button&nbsp;is&nbsp;clicked,&nbsp;checks&nbsp;significant&nbsp;point&nbsp;placement&nbsp;and&nbsp;calculate&nbsp;score.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-canvas_mouse_down"><strong>canvas_mouse_down</strong></a>(self, x, y, button, **event_args)</dt><dd><tt>Start&nbsp;drawing&nbsp;when&nbsp;mouse&nbsp;is&nbsp;pressed&nbsp;on&nbsp;canvas.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-canvas_mouse_leave"><strong>canvas_mouse_leave</strong></a>(self, x, y, **event_args)</dt><dd><tt>Stop&nbsp;drawing&nbsp;when&nbsp;mouse&nbsp;leaves&nbsp;canvas.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-canvas_mouse_move"><strong>canvas_mouse_move</strong></a>(self, x, y, **event_args)</dt><dd><tt>Draw&nbsp;and&nbsp;record&nbsp;position&nbsp;while&nbsp;drawing.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-canvas_mouse_up"><strong>canvas_mouse_up</strong></a>(self, x, y, button, **event_args)</dt><dd><tt>Finish&nbsp;drawing&nbsp;and&nbsp;recording&nbsp;when&nbsp;mouse&nbsp;up.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-check"><strong>check</strong></a>(self)</dt><dd><tt>Checking&nbsp;function,&nbsp;to&nbsp;be&nbsp;moved&nbsp;to&nbsp;Isaac.<br>
+&nbsp;<br>
+Requires&nbsp;correct&nbsp;function,&nbsp;correct&nbsp;values,&nbsp;input&nbsp;drawing&nbsp;and&nbsp;tolerances.<br>
+Calculates&nbsp;regression&nbsp;score,&nbsp;checks&nbsp;against&nbsp;correct&nbsp;values&nbsp;and&nbsp;returns&nbsp;percentage.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_1-timer_tick"><strong>timer_tick</strong></a>(self, **event_args)</dt><dd><tt>Initialize&nbsp;canvas&nbsp;in&nbsp;first&nbsp;timer&nbsp;tick&nbsp;as&nbsp;impossible&nbsp;in&nbsp;__init___.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>draw_colour</strong> = 'rgb(214, 106, 72)'</dl>
+
+<dl><dt><strong>error_red</strong> = 'rgb(207, 84, 84)'</dl>
+
+<dl><dt><strong>stat_circle</strong> = '#339664'</dl>
+
+<dl><dt><strong>x_circle</strong> = '#336888'</dl>
+
+<dl><dt><strong>y_circle</strong> = '#D69648'</dl>
+
+<hr>
+Methods inherited from <a href="graphs.html#graph_form">graph_form</a>:<br>
+<dl><dt><a name="graph_sketcher_1-imp_settings"><strong>imp_settings</strong></a>(self, sets)</dt><dd><tt>Read&nbsp;in&nbsp;settings&nbsp;from&nbsp;settings&nbsp;form,&nbsp;either&nbsp;graphical&nbsp;or&nbsp;code.</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="graph_sketcher_2">class <strong>graph_sketcher_2</strong></a>(<a href="graphs.html#graph_form">graph_form</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Rough&nbsp;sketch&nbsp;based&nbsp;graph&nbsp;sketcher.&nbsp;Subclass&nbsp;of&nbsp;<a href="#graph_form">graph_form</a>.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="graph_sketcher_2-__init__"><strong>__init__</strong></a>(self, form)</dt><dd><tt>Import&nbsp;settings&nbsp;and&nbsp;initialize&nbsp;components.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-btn_check_click"><strong>btn_check_click</strong></a>(self, **event_args)</dt><dd><tt>Checking&nbsp;function,&nbsp;to&nbsp;be&nbsp;moved&nbsp;to&nbsp;Isaac.<br>
+&nbsp;<br>
+Requires&nbsp;correct&nbsp;function,&nbsp;correct&nbsp;values&nbsp;and&nbsp;input&nbsp;drawing.<br>
+Compares&nbsp;input&nbsp;values&nbsp;to&nbsp;correct&nbsp;values&nbsp;in&nbsp;settings.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-btn_clear_click"><strong>btn_clear_click</strong></a>(self, **event_args)</dt><dd><tt>Clear&nbsp;canvas&nbsp;and&nbsp;empty&nbsp;stored&nbsp;values&nbsp;when&nbsp;clear&nbsp;button&nbsp;clicked.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-btn_submit_click"><strong>btn_submit_click</strong></a>(self, **event_args)</dt></dl>
+
+<dl><dt><a name="graph_sketcher_2-canvas_mouse_down"><strong>canvas_mouse_down</strong></a>(self, x, y, button, **event_args)</dt><dd><tt>Start&nbsp;drawing&nbsp;when&nbsp;mouse&nbsp;is&nbsp;pressed&nbsp;on&nbsp;canvas.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-canvas_mouse_leave"><strong>canvas_mouse_leave</strong></a>(self, x, y, **event_args)</dt><dd><tt>Stop&nbsp;drawing&nbsp;when&nbsp;mouse&nbsp;leaves&nbsp;canvas.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-canvas_mouse_move"><strong>canvas_mouse_move</strong></a>(self, x, y, **event_args)</dt><dd><tt>Draw&nbsp;and&nbsp;record&nbsp;position&nbsp;while&nbsp;drawing.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-canvas_mouse_up"><strong>canvas_mouse_up</strong></a>(self, x, y, button, **event_args)</dt><dd><tt>Finish&nbsp;drawing&nbsp;and&nbsp;recording&nbsp;when&nbsp;mouse&nbsp;up.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-drawn_process"><strong>drawn_process</strong></a>(self)</dt><dd><tt>Find&nbsp;significant&nbsp;points&nbsp;in&nbsp;drawn&nbsp;function&nbsp;and&nbsp;check&nbsp;correct&nbsp;form.</tt></dd></dl>
+
+<dl><dt><a name="graph_sketcher_2-timer_tick"><strong>timer_tick</strong></a>(self, **event_args)</dt><dd><tt>Initialize&nbsp;canvas&nbsp;in&nbsp;first&nbsp;timer&nbsp;tick&nbsp;as&nbsp;impossible&nbsp;in&nbsp;__init___.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>draw_colour</strong> = 'rgb(214, 106, 72)'</dl>
+
+<dl><dt><strong>error_red</strong> = 'rgb(207, 84, 84)'</dl>
+
+<dl><dt><strong>stat_circle</strong> = '#339664'</dl>
+
+<dl><dt><strong>x_circle</strong> = '#336888'</dl>
+
+<dl><dt><strong>y_circle</strong> = '#D69648'</dl>
+
+<hr>
+Methods inherited from <a href="graphs.html#graph_form">graph_form</a>:<br>
+<dl><dt><a name="graph_sketcher_2-imp_settings"><strong>imp_settings</strong></a>(self, sets)</dt><dd><tt>Read&nbsp;in&nbsp;settings&nbsp;from&nbsp;settings&nbsp;form,&nbsp;either&nbsp;graphical&nbsp;or&nbsp;code.</tt></dd></dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-extract_vals"><strong>extract_vals</strong></a>(box_list)</dt><dd><tt>Return&nbsp;list&nbsp;of&nbsp;floats&nbsp;extracted&nbsp;from&nbsp;list&nbsp;of&nbsp;input&nbsp;boxes.</tt></dd></dl>
+ <dl><dt><a name="-fill_up"><strong>fill_up</strong></a>(function, xran, step_mult<font color="#909090">=1</font>)</dt><dd><tt>Returns&nbsp;list&nbsp;of&nbsp;tuples&nbsp;of&nbsp;(x,&nbsp;y)&nbsp;values&nbsp;for&nbsp;function&nbsp;over&nbsp;domain&nbsp;xran&nbsp;(tuple).</tt></dd></dl>
+ <dl><dt><a name="-find_compare"><strong>find_compare</strong></a>(point, values, tolx<font color="#909090">=0.1</font>, toly<font color="#909090">=0.1</font>)</dt><dd><tt>Find&nbsp;if&nbsp;any&nbsp;point&nbsp;if&nbsp;values&nbsp;is&nbsp;close&nbsp;enough&nbsp;to&nbsp;point,&nbsp;and&nbsp;return&nbsp;val_compare&nbsp;score.</tt></dd></dl>
+ <dl><dt><a name="-find_intersecs"><strong>find_intersecs</strong></a>(values, tol<font color="#909090">=1</font>, x<font color="#909090">=False</font>, y<font color="#909090">=False</font>)</dt><dd><tt>Finds&nbsp;x&nbsp;intersections&nbsp;in&nbsp;maxima&nbsp;in&nbsp;list&nbsp;of&nbsp;(x,y)&nbsp;tuples&nbsp;and&nbsp;returns&nbsp;list&nbsp;of&nbsp;found&nbsp;tuples.<br>
+&nbsp;<br>
+&nbsp;<br>
+values&nbsp;(list)&nbsp;--&nbsp;list&nbsp;of&nbsp;tuples&nbsp;to&nbsp;search.<br>
+tol&nbsp;(number)&nbsp;--&nbsp;how&nbsp;close&nbsp;values&nbsp;have&nbsp;to&nbsp;be&nbsp;to&nbsp;be&nbsp;considered&nbsp;continuous.<br>
+x,&nbsp;y&nbsp;(bool)&nbsp;--&nbsp;which&nbsp;axis&nbsp;to&nbsp;find&nbsp;intersections&nbsp;in.</tt></dd></dl>
+ <dl><dt><a name="-find_stationary"><strong>find_stationary</strong></a>(values, tolx<font color="#909090">=1</font>, toly<font color="#909090">=1</font>)</dt><dd><tt>Finds&nbsp;minima&nbsp;in&nbsp;maxima&nbsp;in&nbsp;list&nbsp;of&nbsp;(x,y)&nbsp;tuples&nbsp;and&nbsp;returns&nbsp;list&nbsp;of&nbsp;found&nbsp;tuples.<br>
+&nbsp;<br>
+values&nbsp;(list)&nbsp;--&nbsp;list&nbsp;of&nbsp;tuples&nbsp;to&nbsp;search.<br>
+tol&nbsp;(number)&nbsp;--&nbsp;how&nbsp;close&nbsp;values&nbsp;have&nbsp;to&nbsp;be&nbsp;to&nbsp;be&nbsp;considered&nbsp;continuous.</tt></dd></dl>
+ <dl><dt><a name="-gauss_blur"><strong>gauss_blur</strong></a>(alls, sd<font color="#909090">=4</font>)</dt><dd><tt>Takes&nbsp;in&nbsp;a&nbsp;list&nbsp;of&nbsp;functions&nbsp;(list&nbsp;of&nbsp;lists&nbsp;of&nbsp;(x,y)&nbsp;tuples),&nbsp;returns&nbsp;smoothed&nbsp;continuous&nbsp;list&nbsp;of&nbsp;tuples.<br>
+&nbsp;<br>
+alls&nbsp;(list)&nbsp;--&nbsp;list&nbsp;of&nbsp;lists&nbsp;of&nbsp;tuples,&nbsp;each&nbsp;list&nbsp;of&nbsp;tuples&nbsp;corresponding&nbsp;to&nbsp;a&nbsp;section&nbsp;of&nbsp;continuous&nbsp;function.<br>
+sd&nbsp;(int)&nbsp;--&nbsp;optional&nbsp;width&nbsp;of&nbsp;gaussian.</tt></dd></dl>
+ <dl><dt><a name="-least_squares"><strong>least_squares</strong></a>(values, function)</dt><dd><tt>Return&nbsp;R^2&nbsp;values&nbsp;for&nbsp;least&nbsp;squares&nbsp;test&nbsp;of&nbsp;values&nbsp;against&nbsp;function</tt></dd></dl>
+ <dl><dt><a name="-num_string"><strong>num_string</strong></a>(n)</dt><dd><tt>Returns&nbsp;formatted&nbsp;string&nbsp;of&nbsp;float&nbsp;n.</tt></dd></dl>
+ <dl><dt><a name="-val_compare"><strong>val_compare</strong></a>(test_list, corr_list, tol<font color="#909090">=1</font>)</dt><dd><tt>Return&nbsp;score&nbsp;out&nbsp;of&nbsp;one&nbsp;to&nbsp;how&nbsp;well&nbsp;test_list&nbsp;values&nbsp;match&nbsp;corr_list&nbsp;values.<br>
+&nbsp;<br>
+Uses&nbsp;square&nbsp;root&nbsp;of&nbsp;fractional&nbsp;difference.</tt></dd></dl>
+ <dl><dt><a name="-val_compare2"><strong>val_compare2</strong></a>(test_list, corr_list)</dt><dd><tt>Return&nbsp;score&nbsp;out&nbsp;of&nbsp;one&nbsp;to&nbsp;how&nbsp;well&nbsp;test_list&nbsp;values&nbsp;match&nbsp;corr_list&nbsp;values&nbsp;(exactly).<br>
+&nbsp;<br>
+Uses&nbsp;square&nbsp;root&nbsp;of&nbsp;fractional&nbsp;difference.</tt></dd></dl>
+</td></tr></table>
+</body></html>

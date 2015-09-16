@@ -34,8 +34,11 @@ import math
 import draw
 import physics
 from anvil import*
-
-from settings import settings
+try:
+    from settings import settings
+except ImportError:
+    pass
+import isaac
 
 class graph_plot():
     """Plots values (list of (x,y) tuples) on Anvil canvas.
@@ -167,7 +170,7 @@ class graph_plot():
 
                 #check value is within plot range
                 xcheck = self.xrange[0] <= x[i] <=self.xrange[1] and self.xrange[0] <= x[i - 1] <=self.xrange[1]
-                ycheck = self.yrange[0] <= fx[i] <=self.yrange[1] and self.xrange[0] <= fx[i - 1] <=self.xrange[1]
+                ycheck = self.yrange[0] <= fx[i] <=self.yrange[1] and self.yrange[0] <= fx[i - 1] <=self.yrange[1]
 
                 if xcheck and ycheck:
                     #check subsequent values are not too far apart (discontinuity)
@@ -622,9 +625,12 @@ def least_squares(values, function):
     sumsq = 0
     sumres = 0
     for x, y in values:
-        sumres += (y-function(x))**2
-        sumsq += (y -av)**2
-
+        try:
+            sumres += (y-function(x))**2
+            sumsq += (y -av)**2
+        except:
+            #can't catch negative power error
+            pass
     regscore = round(1 - sumres/sumsq, 4)
     return regscore if regscore>0 else 0
 
@@ -634,7 +640,7 @@ def find_compare(point, values, tolx=0.1, toly=0.1):
     xfound = 0
     yfound = 0
     for x2,y2 in values:
-        #10% fractional difference
+        #difference has to be less than tolerance to compare
         testx = abs((x2-x1)) <= tolx
         testy = abs((y2-y1)) <= toly
         if testx and testy:
@@ -646,10 +652,9 @@ class graph_form():
 
     Methods:
     imp_settings -- read in settings from settings form.
-    init_components -- initialize some shared components.
     """
     def imp_settings(self, sets):
-        """Read in settings from settings from, either graphical or code."""
+        """Read in settings from settings form, either graphical or code."""
 
         #graphical
         if sets.check_graphical.checked:
@@ -721,35 +726,7 @@ class graph_form():
 
         self.special_points = sets._special_points
 
-    def init_components(self, form):
-        self.btn_submit = Button(text = "Submit")
-        self.btn_submit.set_event_handler("click", self.btn_submit_click)
-        form.add_component(self.btn_submit, row = "A", width_xs = 2, col_xs = 0)
 
-        self.btn_clear = Button(text = "Clear")
-        self.btn_clear.set_event_handler("click", self.btn_clear_click)
-        form.add_component(self.btn_clear, row = "A", width_xs = 2, col_xs = 2)
-
-        self.lbl_func = Label()
-        form.add_component(self.lbl_func, row = "A", width_xs = 4, col_xs = 5)
-
-        self.lbl_cord = Label()
-        form.add_component(self.lbl_cord, row = "A", width_xs = 3, col_xs = 9)
-
-        self.canvas = Canvas(height = "443")
-        self.canvas.set_event_handler("mouse_down", self.canvas_mouse_down)
-        self.canvas.set_event_handler("mouse_up", self.canvas_mouse_up)
-        self.canvas.set_event_handler("mouse_move", self.canvas_mouse_move)
-        self.canvas.set_event_handler("mouse_leave", self.canvas_mouse_leave)
-        form.add_component(self.canvas, row = "B", width_xs = 12, col_xs = 0)
-
-        self.lbl_mark  = Label(height = "96", align = "center")
-        form.add_component(self.lbl_mark, row = "C", width_xs = 10, col_xs = 1)
-
-
-        self.timer = Timer(interval = 0.5)
-        self.timer.set_event_handler("tick", self.timer_tick)
-        form.add_component(self.timer)
 
 
 class graph_sketcher_1(graph_form):
@@ -764,53 +741,68 @@ class graph_sketcher_1(graph_form):
     stat_circle = "#339664"
 
     def canvas_mouse_move(self, x, y, **event_args):
+        """Draw and record position while drawing."""
+        #check everything has finished loading (not "first")
         if self.first == False:
+            #find values corresponding to mouse position
             xy = self.graph.find_xy(x, y)
-
+            #if drawing, plot and record
             if self.mousedown:
                 self.canvas.line_to(x,y)
                 self.canvas.stroke()
                 self.newvalues.append(xy)
+            #update Coordinates
             self.lbl_cord.text = "({0}, {1})".format(num_string(xy[0]), num_string(xy[1]))
 
     def canvas_mouse_up(self, x, y, button, **event_args):
+        """Finish drawing and recording when mouse up."""
         self.mousedown = False
         self.canvas.close_path()
         self.mousedown = False
+        #add drawn line to list of line segments
         self.all.append(self.newvalues)
         self.newvalues = []
 
     def canvas_mouse_leave(self, x, y,  **event_args):
+        """Stop drawing when mouse leaves canvas."""
         self.mousedown = False
         self.all.append(self.newvalues)
         self.newvalues = []
 
     def canvas_mouse_down(self, x, y, button, **event_args):
+        """Start drawing when mouse is pressed on canvas."""
         self.mousedown = True
+        #if they've already submiited, clear screen
         if self.submitted and button == 0:
             self.btn_clear_click()
         self.canvas.reset_transform()
+        #set drawing style and start drawing
         self.canvas.move_to(x,y)
         self.canvas.stroke_style = self.draw_colour
         self.canvas.line_width = self.graph.line_width
         self.canvas.begin_path()
-
+        #find corresponding values
         xy = self.graph.find_xy(x, y)
         self.newvalues.append(xy)
 
     def btn_clear_click(self, **event_args):
+        """Clear canvas and empty stored values when clear button clicked."""
+        #reset transforms and clear
         draw.reset2(self.canvas, 1)
         draw.clear_canvas(self.canvas, "#fff")
+        #empty recorded values
         self.newvalues = []
         self.all = []
-
+        #Clear mark label
         self.lbl_mark.text = ""
         self.lbl_mark.background = "#fff"
 
         self.graph.axes_enabled = True
+        #if there is a pre-plot function, draw that
         if self.preplot:
             self.graph.func(self.prevalues)
             self.graph.plot(colour = "#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
+        #else blank plot
         else:
             self.graph.func(self.startvals)
             self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
@@ -818,13 +810,20 @@ class graph_sketcher_1(graph_form):
         self.submitted = False
 
     def check(self):
+        """Checking function, to be moved to Isaac.
+
+        Requires correct function, correct values, input drawing and tolerances.
+        Calculates regression score, checks against correct values and returns percentage.
+        """
+        #minimum gap for discontinuity detection
         tolx  = 8/self.graph.xu
         toly = 8/self.graph.yu
-
+        #calculate regression
         regscore = least_squares(self.newvalues, self.correct_function)
         score = 0
+        #total number of things being checked (scores out of 1)
         check_total = 1
-
+        #correct and input stationary points
         corr_x_stat = []
         corr_y_stat = []
         test_x_stat = []
@@ -835,14 +834,19 @@ class graph_sketcher_1(graph_form):
             test_x_stat = zip(*self.teststats)[0]
             test_y_stat = zip(*self.teststats)[1]
 
+        #find comparison scores for intersections
         score += val_compare(self.test_x_ints, self.corr_x_ints, tol=tolx) + val_compare(self.test_y_ints, self.corr_y_ints, tol=toly)
+        #find comparison scores for stationary points, comparing x and y values individually
         score += val_compare(test_x_stat, corr_x_stat, tol=tolx) + val_compare(test_y_stat, corr_y_stat, tol=toly)
+        #output to console for checking scoring
         print "regression = {}".format(regscore*100)
         print "point hits = {}".format(score*100/4.0)
         score += regscore
+        #check special points if provided
         if len(self.special_points)>0:
             check_total += len(self.special_points)
             for point in self.special_points:
+                #see if any drawn points are near special point, then compare
                 score += find_compare(point, self.newvalues, tolx=tolx, toly=toly)
 
 
@@ -859,30 +863,33 @@ class graph_sketcher_1(graph_form):
 
 
     def btn_submit_click(self, **event_args):
+        """When submit button is clicked, checks significant point placement and calculate score."""
+        #check something has been drawn
         if len(self.all) > 0:
             self.submitted = True
+            #clear canvas
             draw.clear_canvas(self.canvas, "#fff")
+            #if there is a preplot function, plot it
             if self.preplot:
                 self.graph.func(self.prevalues)
-                self.graph.plot(colour = "#d69134", xmarker = self.xmarker, ymarker = self.ymarker)
+                self.graph.plot(colour="#d69134", xmarker=self.xmarker, ymarker=self.ymarker)
+            #smooth input
             self.newvalues = gauss_blur(self.all)
-
-
+            #plot input
             self.graph.func(self.newvalues)
             self.graph.axes_enabled = True
-            self.graph.plot(colour = self.draw_colour, xmarker = self.xmarker, ymarker = self.ymarker)
-
+            self.graph.plot(colour=self.draw_colour, xmarker=self.xmarker, ymarker=self.ymarker)
+            #set x and y tolerances, if points are further apart it is a discontinuity
             tolx  = 50/self.graph.xu
             toly = 50/self.graph.yu
-
+            #find stationary points and intersections in smoothed input
             self.teststats = find_stationary(self.newvalues, toly=toly, tolx=tolx)
-            self.test_x_ints = find_intersecs(self.newvalues, tol = toly, x = True)
-            self.test_y_ints = find_intersecs(self.newvalues, tol = tolx, y = True)
-
+            self.test_x_ints = find_intersecs(self.newvalues, tol=toly, x=True)
+            self.test_y_ints = find_intersecs(self.newvalues, tol=tolx, y=True)
+            #clear mark label
             self.lbl_mark.text = ""
             numbers = True
-
-
+            #Check correct numbers of significant points and notify if not. Circle detected erroneous points.
             if len(self.corrstats) != len(self.teststats):
                 self.lbl_mark.text += "Wrong number of stationary points"
                 self.lbl_mark.background = self.error_red
@@ -901,8 +908,9 @@ class graph_sketcher_1(graph_form):
                 self.lbl_mark.background = self.error_red
                 self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointoffset = len(self.test_x_ints))
                 numbers = False
-
+            #if correct number of points
             if numbers:
+                #check siginificant points are in the right quadrants/signs
                 xquads = False
                 yquads = False
                 statquads = False
@@ -924,7 +932,7 @@ class graph_sketcher_1(graph_form):
 
                     if test[0]*corr[0]<0 or test[1]*corr[1]<0:
                         statquads = True
-
+                #report wrong signs/quadrants and circle erroneous points
                 if xquads or yquads or statquads:
                     self.lbl_mark.background = self.error_red
                     if xquads:
@@ -937,12 +945,13 @@ class graph_sketcher_1(graph_form):
                         self.graph.circle_points(self.teststats, self.stat_circle, pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
                         self.lbl_mark.text += "\nStationary point(s) in wrong quadrant"
                 else:
-                    score = self.check()
+                    #everything in the right place, check input.
+                    score = self.check() #checking function
                     self.lbl_mark.text = "{0}%".format(round(score))
 
                     self.lbl_mark.background = "#fff"
 
-                    #TODO pass mark checking
+                    #TODO send things to isaac
                     if score >self.pass_mark:
                         self.lbl_mark.text += "\nWell done!"
                         self.graph.func(self.values)
@@ -950,17 +959,16 @@ class graph_sketcher_1(graph_form):
                         self.graph.plot(xmarker = self.xmarker, ymarker = self.ymarker)
                     else:
                         self.lbl_mark.text += "\nScore  over {0}% to pass".format(self.pass_mark)
-                    #self.graph.plot(xmarker = self.xmarker, ymarker = self.ymarker)
-                    #diffd = physics.diff_5(self.values)
-                    #self.graph.func(diffd)
-                    #self.graph.plot(colour = "rgb(32, 167, 25)", xmarker = self.xmarker, ymarker = self.ymarker)
 
 
     def timer_tick (self, **event_args):
+        """Initialize canvas in first timer tick as impossible in __init___."""
         canvas = self.canvas
-
+        #for the first tick of the timer
         if self.first:
+            #calculate correct function over domain
             self.values = fill_up(self.correct_function, self.xran, step_mult=100)
+            #calculate and plot pre plot function if it exists
             self.preplot = True
             try:
                 self.prevalues = fill_up(self.pre_plot_function, self.xran, step_mult=100)
@@ -970,6 +978,7 @@ class graph_sketcher_1(graph_form):
                 self.graph = graph_plot(canvas, self.startvals)
 
             self.graph.axes_enabled = True
+            #if plot ranges provided, change plot ranges from default
             if self.set_xrange != [None, None]:
                 self.graph.xrange = self.set_xrange
             if self.set_yrange != [None, None]:
@@ -982,13 +991,7 @@ class graph_sketcher_1(graph_form):
             else:
                 self.graph.plot(colour="#fff", xmarker=self.xmarker, ymarker=self.ymarker)
 
-            tolx  = 50/self.graph.xu
-            toly = 50/self.graph.yu
-
-            # self.corrstats = find_stationary(self.values, tol = toly)
-            # self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
-            # self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
-
+            #show correct answers in console, for debugging
             print self.corr_x_ints
             print "\n"*3
             print self.corr_y_ints
@@ -998,41 +1001,42 @@ class graph_sketcher_1(graph_form):
             self.first = False
 
     def __init__(self, form):
-
+        """Import settings and initialize components."""
+        #Submit button
         self.btn_submit = Button(text = "Submit")
         self.btn_submit.set_event_handler("click", self.btn_submit_click)
-        form.add_component(self.btn_submit, row = "A", width_xs = 2, col_xs = 0)
-
+        form.add_component(self.btn_submit, row="A", width_xs=2, col_xs=0)
+        #Clear button
         self.btn_clear = Button(text = "Clear")
         self.btn_clear.set_event_handler("click", self.btn_clear_click)
-        form.add_component(self.btn_clear, row = "A", width_xs = 2, col_xs = 2)
-
+        form.add_component(self.btn_clear, row="A", width_xs=2, col_xs=2)
+        #Function label
         self.lbl_func = Label()
-        form.add_component(self.lbl_func, row = "A", width_xs = 4, col_xs = 5)
-
+        form.add_component(self.lbl_func, row="A", width_xs=4, col_xs=5)
+        #Coordinates label
         self.lbl_cord = Label()
-        form.add_component(self.lbl_cord, row = "A", width_xs = 3, col_xs = 9)
-
-        self.canvas = Canvas(height = "443")
+        form.add_component(self.lbl_cord, row="A", width_xs=3, col_xs=9)
+        #Canvas
+        self.canvas = Canvas(height="443")
         self.canvas.set_event_handler("mouse_down", self.canvas_mouse_down)
         self.canvas.set_event_handler("mouse_up", self.canvas_mouse_up)
         self.canvas.set_event_handler("mouse_move", self.canvas_mouse_move)
         self.canvas.set_event_handler("mouse_leave", self.canvas_mouse_leave)
-        form.add_component(self.canvas, row = "B", width_xs = 12, col_xs = 0)
+        form.add_component(self.canvas, row="B", width_xs=12, col_xs=0)
+        #Mark and error label
+        self.lbl_mark  = Label(height="96", align="center")
+        form.add_component(self.lbl_mark, row="C", width_xs=10, col_xs=1)
 
-        self.lbl_mark  = Label(height = "96", align = "center")
-        form.add_component(self.lbl_mark, row = "C", width_xs = 10, col_xs = 1)
-
-
-        self.timer = Timer(interval = 0.5)
+        #invisible timer component
+        self.timer = Timer(interval=0.5)
         self.timer.set_event_handler("tick", self.timer_tick)
         form.add_component(self.timer)
 
-
-
+        #settings form
         sets = settings()
-
+        #import common settings
         self.imp_settings(sets)
+        #import specialised settings
         self.lbl_func.text = self.func_desc
         self.corrstats = sets._stationaries
         self.corr_x_ints = sets._x_intcpts
@@ -1042,6 +1046,7 @@ class graph_sketcher_1(graph_form):
         self.first = True
         self.values = []
         self.newvalues = []
+        #two starting points for quick blank plotting
         self.startvals = [(-0.01,-0.01),(0.01,0.01)]
         self.all = []
         self.submitted = False
@@ -1050,6 +1055,7 @@ class graph_sketcher_2(graph_form):
     """Rough sketch based graph sketcher. Subclass of graph_form.
 
     """
+    #Colour setup
     error_red = "rgb(207, 84, 84)"
     draw_colour = "rgb(214, 106, 72)"
     x_circle = "#336888"
@@ -1058,8 +1064,10 @@ class graph_sketcher_2(graph_form):
 
 
     def canvas_mouse_move(self, x, y, **event_args):
-
-        if self.mousedown:
+        """Draw and record position while drawing."""
+        #check everything has finished loading (not "first")
+        if self.mousedown and self.first == False:
+            #find values corresponding to mouse position
             xy = self.graph.find_xy(x, y)
             self.newvalues.append(xy)
             self.canvas.line_to(x,y)
@@ -1067,36 +1075,51 @@ class graph_sketcher_2(graph_form):
 
 
     def canvas_mouse_up(self, x, y, button, **event_args):
+        """Finish drawing and recording when mouse up."""
         self.mousedown = False
         self.canvas.close_path()
+        #add drawn line to list of line segments
         self.all.append(self.newvalues)
         self.newvalues = []
 
     def canvas_mouse_leave(self, x, y,  **event_args):
+        """Stop drawing when mouse leaves canvas."""
         self.mousedown = False
+        self.all.append(self.newvalues)
+        self.newvalues = []
 
     def canvas_mouse_down(self, x, y, button, **event_args):
-        if self.submitted and button == 0:
+        """Start drawing when mouse is pressed on canvas."""
+        #if they've already submiited, clear screen
+        if self.submitted and button == 1:
             self.btn_clear_click()
         self.mousedown = True
+        #remove transform to record mouse positions
         self.canvas.reset_transform()
         self.canvas.move_to(x,y)
+        #set drawing style and start drawing
         self.canvas.stroke_style = self.draw_colour
         self.canvas.line_width = self.graph.line_width
         self.canvas.begin_path()
-
+        #find corresponding values
         xy = self.graph.find_xy(x, y)
         self.newvalues.append(xy)
 
     def btn_clear_click(self, **event_args):
+        """Clear canvas and empty stored values when clear button clicked."""
+        #reset transforms and clear
+
         draw.clear_canvas(self.canvas, "#fff")
         self.graph.func(self.startvals)
 
+        #empty recorded values
         self.newvalues = []
         self.all = []
         self.grid_stat.clear()
         self.grid_x_int.clear()
         self.grid_y_int.clear()
+        #disable check button
+        self.btn_check.visible = False
         self.lbl_mark.text = ""
         self.lbl_mark.background = "#fff"
 
@@ -1105,23 +1128,30 @@ class graph_sketcher_2(graph_form):
 
 
     def btn_check_click(self, **event_args):
-        tol = 100
+        """Checking function, to be moved to Isaac.
 
+        Requires correct function, correct values and input drawing.
+        Compares input values to correct values in settings.
+        """
+        #correct intersections
         corr_x_ints = self.corr_x_ints
         corr_y_ints = self.corr_y_ints
-
+        #correct stationary points
         corr_x_stat = []
         corr_y_stat = []
         if len(self.corrstats) > 0:
             corr_x_stat = zip(*self.corrstats)[0]
             corr_y_stat = zip(*self.corrstats)[1]
 
+        #input values
         ent_x_ints = extract_vals(self.x_int_box)
         ent_y_ints = extract_vals(self.y_int_box)
         ent_x_stat = extract_vals(self.x_stat_box)
         ent_y_stat = extract_vals(self.y_stat_box)
 
+        #compare intersections
         score = val_compare2(ent_x_ints, corr_x_ints) + val_compare2(ent_y_ints, corr_y_ints)
+        #compare stationary points
         score += val_compare2(ent_x_stat, corr_x_stat) + val_compare2(ent_y_stat, corr_y_stat)
 
         check_total = 0
@@ -1131,36 +1161,41 @@ class graph_sketcher_2(graph_form):
             check_total += 1
         if len(corr_y_ints)>0:
             check_total += 1
+        #convert to percentage of total points available
         score *= 100/check_total
-
 
         self.lbl_mark.text = "{0}%".format(round(score))
 
         self.lbl_mark.background = "#fff"
 
-        #TODO pass mark checking
+        #TODO isaac scoring
         if score >self.pass_mark:
             self.lbl_mark.text += "\nWell done!"
         else:
             self.lbl_mark.text += "\nScore  over {0}% to pass".format(self.pass_mark)
 
+        #clear canvas
         draw.reset2(self.canvas, 1)
         draw.clear_canvas(self.canvas)
+        #plot what they've drawn
         self.graph.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
-
+        #load labels for points from input boxes
         xlabs = [x.text for x in self.x_int_box]
         ylabs = [x.text for x in self.y_int_box]
         statlabs = ["({0}, {1})".format(self.x_stat_box[i].text, self.y_stat_box[i].text) for i in range(len(self.x_stat_box))]
 
-
+        #relabel circled points with input values
         self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), self.x_circle, pointlabels = xlabs)
         self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointlabels = ylabs, pointoffset = len(xlabs))
         self.graph.circle_points(self.teststats, self.stat_circle, pointlabels = statlabs, pointoffset = len(xlabs) + len(ylabs))
 
     def drawn_process(self):
+        """Find significant points in drawn function and check correct form."""
+        #minimum distances for discontinuity detection, based on graph scales
         tolx  = 50/self.graph.xu
         toly = 50/self.graph.yu
 
+        #find stationary points and intersections
         self.teststats = find_stationary(self.newvalues, toly=toly, tolx=tolx)
         self.test_x_ints = find_intersecs(self.newvalues, tol=toly, x = True)
         self.test_y_ints = find_intersecs(self.newvalues, tol=tolx, y = True)
@@ -1168,8 +1203,7 @@ class graph_sketcher_2(graph_form):
         self.lbl_mark.text = ""
         numbers = True
 
-
-
+        #Check correct numbers of significant points and notify if not. Circle detected erroneous points.
         if len(self.corrstats) != len(self.teststats):
             self.lbl_mark.text += "Wrong number of stationary points"
             self.lbl_mark.background = self.error_red
@@ -1185,12 +1219,15 @@ class graph_sketcher_2(graph_form):
             self.lbl_mark.background = self.error_red
             numbers = False
 
+        #lists for storing input boxes
         self.x_int_box = []
         self.y_int_box = []
         self.x_stat_box = []
         self.y_stat_box = []
 
+        #if correct number of points
         if numbers:
+            #check siginificant points are in the right quadrants/signs
             xquads = False
             yquads = False
             statquads = False
@@ -1212,6 +1249,7 @@ class graph_sketcher_2(graph_form):
 
                 if test[0]*corr[0]<0 or test[1]*corr[1]<0:
                     statquads = True
+            #report wrong signs/quadrants
 
             if xquads or yquads or statquads:
                 self.lbl_mark.background = self.error_red
@@ -1223,7 +1261,11 @@ class graph_sketcher_2(graph_form):
                     self.lbl_mark.text += "\nStationary point(s) in wrong quadrant"
 
             else:
+                #everything in the right place, check input.
+                self.lbl_mark.background = "#7cc96c"
+                self.lbl_mark.text = "Good sketch! Fill in the values of the significant points below."
                 self.btn_check.visible = True
+                #Create boxes to input values
                 if len(self.test_x_ints)>0:
                     int_label = Label(text = "x Intersections", bold = True)
                     self.grid_x_int.add_component(int_label)
@@ -1261,32 +1303,39 @@ class graph_sketcher_2(graph_form):
 
 
     def btn_submit_click(self, **event_args):
+        #Clear input boxes and label
         self.submitted = True
         self.grid_stat.clear()
         self.grid_x_int.clear()
         self.grid_y_int.clear()
         self.lbl_mark.background = "#fff"
 
+        #if something has been drawn
         if len(self.all) > 0:
+            #clear canvas
             draw.clear_canvas(self.canvas, "#fff")
-
+            #smooth input
             self.newvalues = gauss_blur(self.all)
             self.graph.func(self.newvalues)
-
+            #process input
             self.drawn_process()
-
+            #plot smoothed input
             self.graph.plot(colour = "rgb(214, 106, 72)", xmarker = self.xmarker, ymarker = self.ymarker)
-
+            #circle significant points
             self.graph.circle_points(zip(self.test_x_ints, [0]*len(self.test_x_ints)), self.x_circle)
             self.graph.circle_points(zip([0]*len(self.test_y_ints), self.test_y_ints), self.y_circle, pointoffset = len(self.test_x_ints))
             self.graph.circle_points(self.teststats, self.stat_circle, pointoffset = len(self.test_x_ints) + len(self.test_y_ints))
 
     def timer_tick(self, **event_args):
-        canvas = self.canvas
+        """Initialize canvas in first timer tick as impossible in __init___."""
 
+        canvas = self.canvas
+        #for the first tick of the timer
         if self.first:
+            #calculate correct function over domain
             self.graph = graph_plot(canvas, self.startvals)
             self.graph.markers_enabled = False
+            #if plot ranges provided, change plot ranges from default
             if self.set_xrange != [None, None]:
                 self.graph.xrange = self.set_xrange
             else:
@@ -1296,15 +1345,8 @@ class graph_sketcher_2(graph_form):
             self.graph.xlabel = self.xlabel
             self.graph.ylabel = self.ylabel
             self.graph.plot(colour = "#fff", xmarker = self.xmarker, ymarker = self.ymarker)
-            #self.values = fill_up(self.correct_function, self.xran)
 
-            tolx  = 50/self.graph.xu
-            toly = 50/self.graph.yu
-
-            #self.corrstats = find_stationary(self.values, tol = toly)
-            #self.corr_x_ints = find_intersecs(self.values, tol = toly, x = True)
-            #self.corr_y_ints = find_intersecs(self.values, tol = tolx, y = True)
-
+            #show correct answers in console, for debugging
             print self.corr_x_ints
             print "\n"*3
             print self.corr_y_ints
@@ -1317,51 +1359,60 @@ class graph_sketcher_2(graph_form):
 
 
     def __init__(self, form):
+        """Import settings and initialize components."""
+        #Submit button
         self.btn_submit = Button(text = "Submit")
         self.btn_submit.set_event_handler("click", self.btn_submit_click)
-        form.add_component(self.btn_submit, row = "A", width_xs = 2, col_xs = 0)
+        form.add_component(self.btn_submit, row="A", width_xs=2, col_xs=0)
 
+        #Clear button
         self.btn_clear = Button(text = "Clear")
         self.btn_clear.set_event_handler("click", self.btn_clear_click)
-        form.add_component(self.btn_clear, row = "A", width_xs = 2, col_xs = 2)
+        form.add_component(self.btn_clear, row="A", width_xs=2, col_xs=2)
 
+        #Function label
         self.lbl_func = Label()
-        form.add_component(self.lbl_func, row = "A", width_xs = 5, col_xs = 5)
+        form.add_component(self.lbl_func, row="A", width_xs=5, col_xs=5)
 
-        self.canvas = Canvas(height = "443")
+        #Canvas
+        self.canvas = Canvas(height="443")
         self.canvas.set_event_handler("mouse_down", self.canvas_mouse_down)
         self.canvas.set_event_handler("mouse_up", self.canvas_mouse_up)
         self.canvas.set_event_handler("mouse_move", self.canvas_mouse_move)
         self.canvas.set_event_handler("mouse_leave", self.canvas_mouse_leave)
-        form.add_component(self.canvas, row = "B", width_xs = 12, col_xs = 0)
+        form.add_component(self.canvas, row="B", width_xs=12, col_xs=0)
 
-        self.lbl_mark  = Label(height = "96", align = "center")
-        form.add_component(self.lbl_mark, row = "C", width_xs = 10, col_xs = 1)
+        #Mark and error label
+        self.lbl_mark  = Label(height="96", align="center")
+        form.add_component(self.lbl_mark, row="C", width_xs=10, col_xs=1)
+        #input box containers
+        self.grid_x_int = GridPanel(height="200")
+        self.grid_y_int = GridPanel(height="200")
+        self.grid_stat = GridPanel(height="200")
 
-        self.grid_x_int = GridPanel(height = "200")
-        self.grid_y_int = GridPanel(height = "200")
-        self.grid_stat = GridPanel(height = "200")
+        form.add_component(self.grid_x_int, row="D", width_xs=3, col_xs=0)
+        form.add_component(self.grid_y_int, row="D", width_xs=3, col_xs=3)
+        form.add_component(self.grid_stat, row="D", width_xs=4, col_xs=6)
 
-        form.add_component(self.grid_x_int, row = "D", width_xs = 3, col_xs = 0)
-        form.add_component(self.grid_y_int, row = "D", width_xs = 3, col_xs = 3)
-        form.add_component(self.grid_stat, row = "D", width_xs = 4, col_xs = 6)
-
+        #check button
         self.btn_check = Button(text="Check", visible=False)
         self.btn_check.set_event_handler("click", self.btn_check_click)
-        form.add_component(self.btn_check, row = "D", width_xs = 2, col_xs = 10)
+        form.add_component(self.btn_check, row="D", width_xs=2, col_xs=10)
 
-        self.timer = Timer(interval = 0.5)
+        #invisible timer component
+        self.timer = Timer(interval=0.5)
         self.timer.set_event_handler("tick", self.timer_tick)
         form.add_component(self.timer)
 
-
+        #settings form
         sets = settings()
 
+        #import common settings
         self.imp_settings(sets)
         self.lbl_func.text = self.func_desc
         if hasattr(sets, '_show_mark'):
             self.lbl_mark.visible = sets._show_mark
-        self.corrstats = sorted(sets._stationaries,key=lambda x: x[0])
+        self.corrstats = sorted(sets._stationaries, key=lambda x: x[0])
         self.corr_x_ints = sorted(sets._x_intcpts)
         self.corr_y_ints = sorted(sets._y_intcpts)
         self.mousedown = False
@@ -1369,6 +1420,7 @@ class graph_sketcher_2(graph_form):
         self.first = True
         self.values = []
         self.newvalues = []
+        #two starting points for quick blank plotting, needs ranges specified
         self.startvals = [(-0.01,-0.01),(0.01,0.01)]
         self.all = []
         self.submitted = False

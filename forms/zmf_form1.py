@@ -1,3 +1,18 @@
+# Copyright 2015 Seyon Sivarajah
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+"""Anvil form for collision simulation."""
+
 from anvil import *
 import physics
 import draw
@@ -181,6 +196,7 @@ class Form1(Form1Template):
         if -0.05 <=(self.xu - self.newxu) <= 0.05:
             self.zoom = False
 
+    self.slider1.draw()
 
 
   def draw_dashes(self, canvas, i, colour):
@@ -239,27 +255,7 @@ class Form1(Form1Template):
     #arrows
     if not self.running and self.check_vel.checked:
         for ball in balls:
-            #x component
-            draw.arrow(canvas, ball.vel.x*self.arrow_scale, 2*self.linewidth, ball.pos.x, ball.pos.y)
-            canvas.fill_style = "#333333"
-            canvas.fill()
-
-            #y component
-            canvas.translate(ball.pos.x, ball.pos.y)
-            canvas.rotate(math.pi/2)
-            draw.arrow(canvas, ball.vel.y*self.arrow_scale, 2*self.linewidth)
-            canvas.fill()
-            draw.reset2(canvas,xu)
-
-            #velocity vector
-            canvas.translate(ball.pos.x, ball.pos.y)
-            if ball.vel.y>0:
-                canvas.rotate(ball.vel.phi())
-            else:
-                canvas.rotate(-ball.vel.phi())
-            draw.arrow(canvas, ball.vel.mag()*self.arrow_scale, 4*self.linewidth)
-            canvas.fill_style = "#49902a"
-            canvas.fill()
+            draw.vel_arrows(canvas, ball, self.linewidth, self.arrow_scale)
 
             draw.reset2(canvas, xu)
 
@@ -338,21 +334,9 @@ class Form1(Form1Template):
     self.collided = False
     self.zoom = False
     #list of parameter inputs
-    self.param_boxes = []
+    self.param_boxes = [self.txt_mass_1, self.txt_mass_2, self.txt_xsp_1, self.txt_xsp_2, self.txt_ysp_1]
+    self.param_boxes += [self.txt_ysp_2, self.radio_elastic, self.radio_inelastic, self.txt_x_1, self.txt_x_2, self.txt_y_1, self.txt_y_2, self.btn_velreset]
 
-    self.param_boxes.append(self.txt_mass_1)
-    self.param_boxes.append(self.txt_mass_2)
-    self.param_boxes.append(self.txt_xsp_1)
-    self.param_boxes.append(self.txt_xsp_2)
-    self.param_boxes.append(self.txt_ysp_1)
-    self.param_boxes.append(self.txt_ysp_2)
-    self.param_boxes.append(self.radio_elastic)
-    self.param_boxes.append(self.radio_inelastic)
-    self.param_boxes.append(self.txt_x_1)
-    self.param_boxes.append(self.txt_x_2)
-    self.param_boxes.append(self.txt_y_1)
-    self.param_boxes.append(self.txt_y_2)
-    self.param_boxes.append(self.btn_velreset)
 
     self.starts = []
     self.collides = []

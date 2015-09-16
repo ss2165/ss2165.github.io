@@ -11,7 +11,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Anvil service module for physics objects and methods.
 
+Classes:
+vector3 -- 3D vector type with each component as an attribute.
+complex2 -- complex number type.
+ball -- 3D ball with vector attributes and associated methods.
+point_source -- subclass of ball which radiates spherical waves.
+
+Functions:
+exp2 -- complex exponential function.
+disc_convolve -- discrete convolution of two functions.
+dfft -- discrete fast fourier transform (inverse not working).
+disc_fourier -- calculate normal discrete fourier transform.
+disc_inv_fourier -- calculate normal inverse discrete fourier transform.
+runge_kutta4 -- numerical integration using 4th order Runge-Kutta method.
+num_bisection -- find root of function using numerical bisection method.
+num_linear -- find root of function using linear interpolation.
+num_newton -- find root of function using Newton-Raphson method.
+num_secant -- find root of function using secant method.
+diff -- numerical differentiation.
+diff_5 -- 5th order numerical differentiation.
+"""
 import math
 
 
@@ -25,6 +46,7 @@ class ball():
         self.radius = radius
 
     def move(self,dt):
+        #move at current constant velocity
         self.pos = self.pos + self.vel*dt
 
     def zmf_vel(self, other):
@@ -33,6 +55,7 @@ class ball():
         return (self.vel*self.mass + other.vel*other.mass)/summass
 
     def momentum(self):
+        #return momentum vector
         return self.vel*self.mass
 
     def collide(self, other, is_elastic):
@@ -52,14 +75,29 @@ class ball():
         other.vel = v2
 
     def collision_check(self, other):
+        #check if two balls are touching or overlap
         return ((self.pos - other.pos).mag() <= self.radius + other.radius)
 
 class point_source(ball):
+    """Subclass of ball which radiates spherical wavefronts."""
+    #speed of light, default speed.
     c= 3e8
 
     def __init__(self, speed = c, frequency = None, wavelength = None,radius = 0.1, x =0, y =0, xsp = 0, ysp = 0):
+        """Initialize
+        Attributes:
+        speed (float) -- wavespeed.
+        frequency (float) -- wave frequency.
+        wavelength (float) -- wavelength.
+        radius (float) -- source radius.
+        x (float) -- position x component.
+        y (float) -- position y component.
+        xsp (float) -- velocity x component.
+        ysp (float) -- velocity y component.
+        """
         ball.__init__(self, mass=0.1,radius =radius, x =x, y =y, xsp =xsp, ysp =ysp)
 
+        #if only two of speed, wavelength or frequency are provided, calculate the third
         if frequency !=None:
             if wavelength !=None:
                 self.speed = frequency * wavelength
@@ -79,14 +117,31 @@ class point_source(ball):
         self.mousedown = False
     def __mul__(self, other):
         return self
-    def start(self):
-        pass
+
     def radiate(self, dt):
+        #move wavefront
         self.wavefront += self.speed*dt
 
 
 class vector3():
-    """3D vector object"""
+    """3D vector object with each component as an attribute and associated methods.
+
+    Attributes:
+    x (float) -- x component.
+    y (float) -- y component.
+    z (float) -- z component.
+
+    Methods:
+    mag -- magnitude of vector.
+    phi -- angle in xy plane (angle in cylindrical polar coordinates).
+    theta -- angle from z axis (azimuthal angle).
+    multi -- (deprecated) multiply vector by scalar.
+    norm -- normalised vector.
+    phi_rotate -- rotate vector by angle.
+    dot -- dot product.
+    cross -- cross product.
+    str -- formatted string of vector.
+    """
 
     def __init__(self,x, y, z= 0):
         self.x = x
@@ -94,22 +149,23 @@ class vector3():
         self.z = z
 
     def mag(self):
-        #magnitude
+        """Return magnitude."""
         return math.sqrt(self.x**2 + self.y**2 + self.z**2)
     def phi(self):
-        #polar angle in radians, between 0 and pi
-        return math.acos((self- vector3(0,0, self.z)).norm().dot(vector3(1, 0, 0)))
+        """Return polar angle in radians, between -pi and pi."""
+        return math.atan2(self.y, self.x)
     def theta(self):
-        #3d azimuthal angle
+        """Return azimuthal angle."""
         if self.mag() == 0:
             return 0
         else:
-            return math.acos(self.z/self.mag())
+            xymag = vector3(self.x, self.y).mag()
+            return math.atan2(xymag, self.z)
     def multi(self, a):
-        #scalar multiple
+        """deprecated scalar multiple."""
         return vector3(a*self.x, a*self.y, a*self.z)
     def norm(self):
-        #normalised vector
+        """Return normalised vector."""
         mag = self.mag()
         if mag == 0:
             return self
@@ -117,7 +173,7 @@ class vector3():
             return vector3(self.x/mag, self.y/mag, self.z/mag)
 
     def phi_rotate(self, angle, origin):
-        #returns vector with phi changed by angle in anti clockwise direction
+        """Return vector rotated in xy plane by angle in anti clockwise direction"""
         diff= self - origin
         sin = math.sin(angle)
         cos = math.cos(angle)
@@ -125,57 +181,67 @@ class vector3():
         return new + origin
 
     def __add__(self, other):
+        """Add two vectors."""
         return vector3(self.x+other.x, self.y+other.y, self.z+other.z)
 
     def __iadd__(self, other):
+        """Add to vector."""
         self.x += other.x
         self.y += other.y
         self.z += other.z
         return self
 
     def __sub__(self, other):
+        """Subtract two vectors."""
         return vector3(self.x-other.x, self.y-other.y, self.z-other.z)
 
     def __isub__(self, other):
+        """Subtract from vector."""
         self.x -= other.x
         self.y -= other.y
         self.z -= other.z
         return self
 
     def __mul__(self, other):
+        """Multiply by scalar."""
         return vector3(other*self.x, other*self.y, other*self.z)
 
     def __imul__(self, other):
+        """Multiply by scalar in place."""
         self.x *= other
         self.y *= other
         self.z *= other
         return self
 
     def __rmul__(self, other):
+        """Multiply by scalar."""
         return vector3(other*self.x, other*self.y, other*self.z)
 
     def __div__(self, other):
+        """Divide by scalar."""
         return vector3(self.x/other, self.y/other, self.z/other)
 
     def __idiv__(self, other):
+        """Divide by scalar."""
         self.x /= other
         self.y /= other
         self.z /= other
         return self
 
     def dot(self, other):
-        #dots vector self and other
+        """Return dot product of two vectors."""
         return (self.x*other.x+self.y*other.y + self.z*other.z)
 
     def cross(self,other):
-        #crosses vectors self and other
+        """Return cross product of two vectors."""
         return vector3(self.y*other.z- other.y*self.z, other.x*self.z-self.x*other.z, self.x*other.y -self.y*other.x)
 
     def __str__(self):
+        """Return formatted string of vector."""
         return "({0.x}, {0.y}, {0.z})".format(self)
 
 class complex2():
-    """Complex number"""
+    """Complex number with real and imaginary attributes. VERY EARLY STAGES, UNTESTED."""
 
     def __init__(self,re, im):
         if not isinstance(re, (int, long, float)) or not isinstance(im, (int, long, float)):
@@ -184,23 +250,12 @@ class complex2():
         self.im = im
 
     def mag(self):
-        #magnitude
+        """Return Magnitude."""
         return math.sqrt(self.re**2 + self.im**2)
 
     def phase(self):
-        #polar angle in radians, between 0 and pi
+        """Return polar angle in radians, between -pi and pi."""
         return math.atan2(self.im, self.re)
-
-    # def multi(self, a):
-    #     #scalar multiple
-    #     return vector3(a*self.x, a*self.y, a*self.z)
-    # def norm(self):
-    #     #normalised vector
-    #     mag = self.mag()
-    #     if mag == 0:
-    #         return self
-    #     else:
-    #         return vector3(self.x/mag, self.y/mag, self.z/mag)
 
     def polar(self):
         return (self.mag(), self.phase())
@@ -276,6 +331,7 @@ class complex2():
         return "{0.re} + {0.im}i".format(self)
 
 def exp2(x):
+    #return complex exponential, if not complex use normal exponential function.
     if isinstance(x, complex2):
         return math.exp(x.re)*complex2(math.cos(x.im), math.sin(x.im))
     else:
@@ -283,9 +339,6 @@ def exp2(x):
 
 def disc_convolve(f, g):
     """Return discrete convolution list of two discrete function iterables f and g"""
-    #treating g as smaller function
-    # if len(f) < len(g):
-    #     f, g = g, f
 
     result = []
     for i in range(len(f)):
@@ -297,6 +350,7 @@ def disc_convolve(f, g):
     return result
 
 def dfft(x, N, s=1, inverse = False):
+    """Discrete fast fourier transform. Uses complex2 type."""
 
     inv = -1 if inverse else 1
 
@@ -317,20 +371,8 @@ def dfft(x, N, s=1, inverse = False):
             X = [x/N for x in X]
         return X
 
-def inv_dfft(x):
-    N = len(x)
-    swapped = []
-    for value in x:
-        if not isinstance(value, complex2):
-            raise "not complex input"
-        swapped.append(complex2(value.im, value.re))
-    X = dfft(swapped,N,1 )
-    result = []
-    for value in X:
-        result.append(value.im/N)
-    return result
-
 def disc_fourier(x):
+    """Discrete fourier transform of x."""
     X  = []
     i = complex2(0, 1)
     N = len(x)
@@ -343,6 +385,7 @@ def disc_fourier(x):
     return X
 
 def disc_inv_fourier(X):
+    """Inverse discrete fourier transform."""
     x  = []
     i = complex2(0, 1)
     N = len(X)
@@ -355,7 +398,7 @@ def disc_inv_fourier(X):
     return x
 
 def runge_kutta4(y, f, t, dt):
-    """Return next iteration of function y with derivative f with timestep dt using Runge-Kutta 4th order"""
+    """Return next iteration of function y with derivative f with timestep dt using Runge-Kutta 4th order."""
     k1 = f(t, y)
     k2 = f(t + dt/2, y + k1*dt/2)
     k3 = f(t + dt/2, y + k2*dt/2)
@@ -364,6 +407,7 @@ def runge_kutta4(y, f, t, dt):
     return y
 
 def num_bisection(function, a, b, iterations):
+    """Find root of function with guesses a,b over iterations using bisection."""
     iterations  = int(math.sqrt(iterations**2))
     if a>b:
         a, b = b, a
@@ -381,6 +425,7 @@ def num_bisection(function, a, b, iterations):
     return c
 
 def num_linear(function, a, b, iterations):
+    """Find root of function with guesses a,b over iterations using linear interpolation."""
     iterations  = int(math.sqrt(iterations**2))
     if a>b:
         a, b = b, a
@@ -435,6 +480,7 @@ def num_secant(function, guess1, guess2, iterations, tol = 0.000001):
     return guess1
 
 def diff(values):
+    """Differentiate values numerically."""
     res = []
     for i in range(len(values)-1):
         x1,y1  = values[i]
@@ -445,6 +491,7 @@ def diff(values):
     return res
 
 def diff_5(values):
+    """Differentiate values numerically using 5th order method."""
     res = []
     for i in range(2,len(values)-2):
         h = values[i+1][0] - values[i][0]

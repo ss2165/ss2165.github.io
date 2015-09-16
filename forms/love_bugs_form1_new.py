@@ -1,3 +1,16 @@
+# Copyright 2015 Seyon Sivarajah
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
 from anvil import *
 import physics
 import draw
@@ -54,7 +67,10 @@ class Form1(Form1Template):
         #     self.zoom = False
         # if self.zoom:
         #     self.xu += self.step
-
+        if self.counter %5 == 0:
+            self.slid_N.draw()
+            self.slid_v.draw()
+            self.slid_L.draw()
         self.counter += 1
 
     def initial(self, canvas):
@@ -146,7 +162,14 @@ class Form1(Form1Template):
 
     def btn_run_click (self, **event_args):
         # This method is called when the button is clicked
-        draw.btn_run_click(self)
+        if not self.running:
+                self.running  = True
+                self.reset = False
+                self.btn_run.text = "Pause"
+
+        else:
+            self.running = False
+            self.btn_run.text = "Run"
 
         #make parameters only editable while reset
         for box in self.param_boxes:
@@ -154,7 +177,12 @@ class Form1(Form1Template):
 
     def btn_reset_click (self, **event_args):
         # This method is called when the button is clicked
-        draw.btn_reset_click(self)
+
+        #called when reset button is clicked
+        self.running = False
+        self.reset = True
+        self.btn_run.text = "Run"
+
         self.t = 0
         self.lbl_t.text = "t = {0}s".format(repr(self.t))
         #make parameters only editable while reset

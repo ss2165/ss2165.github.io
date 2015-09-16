@@ -1,3 +1,16 @@
+# Copyright 2015 Seyon Sivarajah
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
 from anvil import *
 import physics
 import draw
@@ -13,11 +26,11 @@ class Form1(Form1Template):
     arrow_scale = 0.5e-7
     trail_buffer = 20
 
-    def check_paths_change (self, **event_args):
+    def check_paths_change(self, **event_args):
         self.draw_all()
-    def check_trail_change (self, **event_args):
+    def check_trail_change(self, **event_args):
         self.draw_all()
-    def txt_change (self, **event_args):
+    def txt_change(self, **event_args):
         Ex  = self.txt_E_x.text
         Ey  = self.txt_E_y.text
         Ez  = self.txt_E_z.text
@@ -30,7 +43,7 @@ class Form1(Form1Template):
             self.B = physics.vector3(float(self.txt_B_x.text),float(self.txt_B_y.text), float(self.txt_B_z.text))
         self.draw_all()
 
-    def canvas_mouse_move (self, x, y, **event_args):
+    def canvas_mouse_move(self, x, y, **event_args):
         # This method is called when the mouse cursor moves over this component
         #record mouse pos
         self.mouse.x = x/self.xu
@@ -50,13 +63,13 @@ class Form1(Form1Template):
             self.ball.vel.y = float(self.txt_ysp.text)
 
             self.draw_all()
-    def canvas_mouse_up (self, x, y, button, **event_args):
+    def canvas_mouse_up(self, x, y, button, **event_args):
     # This method is called when a mouse button is released on this component
         self.mousedown = False
         self.arrowdown = False
         self.draw_all()
 
-    def canvas_mouse_down (self, x, y, button, **event_args):
+    def canvas_mouse_down(self, x, y, button, **event_args):
         # This method is called when a mouse button is pressed on this component
         self.mouse.x = x/self.xu
         self.mouse.y = (self.ch-y)/self.xu
@@ -72,7 +85,7 @@ class Form1(Form1Template):
     def accel(self, t, y):
         return (self.E + y.cross(self.B))*self.ball.charge/self.ball.mass
 
-    def timer_tick (self, **event_args):
+    def timer_tick(self, **event_args):
         canvas = self.canvas
         self.cw = canvas.get_width()
         self.ch = canvas.get_height()
@@ -122,14 +135,14 @@ class Form1(Form1Template):
             #     self.zoom = False
 
             self.draw_all()
-
+        self.slider1.draw()
         old = new*1
 
-    def btn_path_click (self, **event_args):
+    def btn_path_click(self, **event_args):
         self.paths= []
         self.draw_all()
 
-    def btn_run_click (self, **event_args):
+    def btn_run_click(self, **event_args):
         # This method is called when the button is clicked
         if not self.running:
             self.running  = True
@@ -152,7 +165,7 @@ class Form1(Form1Template):
 
         self.draw_all()
 
-    def btn_reset_click (self, **event_args):
+    def btn_reset_click(self, **event_args):
         # This method is called when the button is clicked
         self.running = False
         self.reset = True

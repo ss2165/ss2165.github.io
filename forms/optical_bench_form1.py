@@ -1,7 +1,22 @@
+# Copyright 2015 Seyon Sivarajah
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License
+"""Anvil form for optical bench simulation."""
 from anvil import *
 import physics
 import draw
 import math
+import graphs
 
 from slits import slits
 from single import single
@@ -12,38 +27,7 @@ class Form1(Form1Template):
     W = 0.3
     x_stp = 0.0005
     line_width = 0.001
-    def canvas_mouse_move (self, x, y, **event_args):
-
-        # This method is called when the mouse cursor moves over this component
-        #record mouse pos
-        #   self.mouse.x = x/(self.xu*1.0)
-        #   self.mouse.y = (self.ch-y)/(self.xu*1.0)
-        pass
-
-    def canvas_mouse_up (self, x, y, button, **event_args):
-         # This method is called when a mouse button is released on this component
-        #   self.mouse.x = x/(self.xu*1.0)
-        #   self.mouse.y = (self.ch-y)/(self.xu*1.0)
-        pass
-
-    def canvas_mouse_down (self, x, y, button, **event_args):
-        # This method is called when a mouse button is pressed on this component
-        #   self.mouse.x = x/(self.xu*1.0)
-        #   self.mouse.y = (self.ch-y)/(self.xu*1.0)
-        pass
-
-    def btn_run_click (self, **event_args):
-        # This method is called when the button is clicked
-        #if not self.running:
-        #  self.running  = True
-        #  self.reset = False
-        #  self.btn_run.text = "Pause"
-
-        #else:
-        #  self.running = False
-        #  self.btn_run.text = "Run"
-        pass
-
+    W
 
     def btn_reset_click (self, **event_args):
         # This method is called when the button is clicked
@@ -97,6 +81,10 @@ class Form1(Form1Template):
 
             self.first = False
         self.change()
+        self.slits.N_slider.draw()
+        self.slits.d_slider.draw()
+        self.single.a_slider.draw()
+        self.grating.n_slider.draw()
 
     def draw_grating(self, n, wav):
         canvas = self.canvas
@@ -164,7 +152,7 @@ class Form1(Form1Template):
             else:
                 fx.append(self.single_int(a,wav,ang))
 
-        graph = draw.graph_plot(canvas,zip(x,fx))
+        graph = graphs.graph_plot(canvas,zip(x,fx))
         graph.yrange[0] = 0
         graph.xlabel = "x/m"
         graph.ylabel = "I"

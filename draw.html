@@ -1,0 +1,140 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module draw</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>draw</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/seyon/google%20drive/isaac/anvil/ss2165.github.io/draw.py">c:\users\seyon\google drive\isaac\anvil\ss2165.github.io\draw.py</a></font></td></tr></table>
+    <p><tt>Anvil&nbsp;service&nbsp;module&nbsp;for&nbsp;drawing&nbsp;objects&nbsp;and&nbsp;methods,&nbsp;used&nbsp;with&nbsp;the&nbsp;canvas&nbsp;component.<br>
+&nbsp;<br>
+Classes:<br>
+<a href="#slider">slider</a>&nbsp;--&nbsp;canvas&nbsp;based&nbsp;<a href="#slider">slider</a>&nbsp;object&nbsp;for&nbsp;anvil&nbsp;apps.<br>
+&nbsp;<br>
+Functions:<br>
+reset2&nbsp;--&nbsp;scale&nbsp;canvas&nbsp;and&nbsp;move&nbsp;origin&nbsp;to&nbsp;bottom&nbsp;left.<br>
+clear_canvas&nbsp;--&nbsp;clear&nbsp;the&nbsp;canvas.<br>
+border&nbsp;--&nbsp;draw&nbsp;border&nbsp;on&nbsp;canvas.<br>
+eq_triangle&nbsp;--&nbsp;draw&nbsp;equilateral&nbsp;triangle.<br>
+circle&nbsp;--&nbsp;draw&nbsp;a&nbsp;circle.<br>
+arrow&nbsp;--&nbsp;draw&nbsp;standard&nbsp;arrow.<br>
+polygon&nbsp;--&nbsp;draw&nbsp;a&nbsp;regular&nbsp;polygon.<br>
+dashed_line&nbsp;--&nbsp;draw&nbsp;a&nbsp;dashed&nbsp;line.<br>
+paths&nbsp;--&nbsp;draw&nbsp;dashed&nbsp;lines&nbsp;joining&nbsp;list&nbsp;of&nbsp;points.<br>
+vel_arrows&nbsp;--&nbsp;draw&nbsp;velocity&nbsp;arrow&nbsp;on&nbsp;ball&nbsp;object.<br>
+cart_arrows&nbsp;--&nbsp;draw&nbsp;cartesian&nbsp;component&nbsp;arrows&nbsp;of&nbsp;a&nbsp;vector.<br>
+wavelength_to_rgb&nbsp;--&nbsp;convert&nbsp;wavelength&nbsp;to&nbsp;rgb&nbsp;values.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="math.html">math</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="draw.html#slider">slider</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="slider">class <strong>slider</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>Anvil&nbsp;Canvas&nbsp;<a href="#slider">slider</a>&nbsp;object.<br>
+&nbsp;<br>
+Create&nbsp;a&nbsp;<a href="#slider">slider</a>&nbsp;between&nbsp;mini&nbsp;and&nbsp;maxi&nbsp;with&nbsp;indicator&nbsp;of&nbsp;given&nbsp;colour&nbsp;which&nbsp;can&nbsp;take&nbsp;values&nbsp;in&nbsp;steps&nbsp;of&nbsp;stepsize.<br>
+The&nbsp;starting&nbsp;position&nbsp;is&nbsp;given&nbsp;by&nbsp;start.<br>
+Current&nbsp;value&nbsp;is&nbsp;given&nbsp;in&nbsp;the&nbsp;value&nbsp;attribute.<br>
+Default&nbsp;colour&nbsp;is&nbsp;blue&nbsp;(#318fdb).&nbsp;Optional&nbsp;colour&nbsp;must&nbsp;be&nbsp;given&nbsp;in&nbsp;hex&nbsp;string&nbsp;form.<br>
+Minimum&nbsp;canvas&nbsp;height&nbsp;40px&nbsp;for&nbsp;standard,&nbsp;50px&nbsp;with&nbsp;indicators.<br>
+&nbsp;<br>
+Attributes:<br>
+mini&nbsp;(float)--&nbsp;minimum&nbsp;value&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+maxi&nbsp;(float)--&nbsp;maximum&nbsp;values&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+stepsize&nbsp;(float)--&nbsp;steps&nbsp;to&nbsp;move&nbsp;<a href="#slider">slider</a>&nbsp;by.<br>
+value&nbsp;(float)--&nbsp;user&nbsp;accesible,&nbsp;current&nbsp;value&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+mousedown&nbsp;(bool)--&nbsp;is&nbsp;mouse&nbsp;pressed&nbsp;on&nbsp;<a href="#slider">slider</a>.<br>
+indicator&nbsp;(bool)--&nbsp;show&nbsp;value&nbsp;under&nbsp;<a href="#slider">slider</a>.<br>
+maxmin&nbsp;(bool)--&nbsp;show&nbsp;maximum&nbsp;and&nbsp;minimum&nbsp;values.<br>
+base_colour&nbsp;(string)--&nbsp;hex&nbsp;colour&nbsp;string&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+enabled&nbsp;(bool)--&nbsp;is&nbsp;interaction&nbsp;enabled.<br>
+&nbsp;<br>
+Methods:<br>
+draw&nbsp;--&nbsp;draw&nbsp;<a href="#slider">slider</a>&nbsp;on&nbsp;canvas.<br>
+map_mouse&nbsp;--&nbsp;map&nbsp;canvas&nbsp;mouse&nbsp;events&nbsp;to&nbsp;<a href="#slider">slider</a>&nbsp;object&nbsp;mouse&nbsp;events.<br>
+mouse_down&nbsp;--&nbsp;move&nbsp;<a href="#slider">slider</a>&nbsp;to&nbsp;click&nbsp;position.<br>
+mouse_move&nbsp;--&nbsp;move&nbsp;<a href="#slider">slider</a>&nbsp;with&nbsp;mouse&nbsp;if&nbsp;mouse&nbsp;down.<br>
+mouse_up&nbsp;--&nbsp;stop&nbsp;interaction&nbsp;when&nbsp;mouse&nbsp;up.<br>
+mouse_leave&nbsp;--&nbsp;stop&nbsp;mouse&nbsp;interaction&nbsp;when&nbsp;mouse&nbsp;leave.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="slider-__init__"><strong>__init__</strong></a>(self, canvas, mini, maxi, stepsize, start<font color="#909090">=0</font>, colour<font color="#909090">='#318fdb'</font>)</dt><dd><tt>Initialize&nbsp;<a href="#slider">slider</a>&nbsp;object.<br>
+&nbsp;<br>
+Parameters:<br>
+canvas&nbsp;(Canvas)--&nbsp;anvil&nbsp;canvas&nbsp;component&nbsp;to&nbsp;draw&nbsp;on.<br>
+mini&nbsp;(float)--&nbsp;minimum&nbsp;value&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+maxi&nbsp;(float)--&nbsp;maximum&nbsp;values&nbsp;of&nbsp;<a href="#slider">slider</a>.<br>
+stepsize&nbsp;(float)--&nbsp;steps&nbsp;to&nbsp;move&nbsp;<a href="#slider">slider</a>&nbsp;by.<br>
+start&nbsp;(float)--&nbsp;value&nbsp;to&nbsp;start&nbsp;<a href="#slider">slider</a>&nbsp;at.<br>
+colour&nbsp;(string)--&nbsp;MUST&nbsp;BE&nbsp;HEX&nbsp;STRING&nbsp;colour&nbsp;of&nbsp;<a href="#slider">slider</a>.</tt></dd></dl>
+
+<dl><dt><a name="slider-draw"><strong>draw</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="slider-map_mouse"><strong>map_mouse</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="slider-mouse_down"><strong>mouse_down</strong></a>(self, x, y, button, **event_args)</dt></dl>
+
+<dl><dt><a name="slider-mouse_leave"><strong>mouse_leave</strong></a>(self, x, y, **event_args)</dt></dl>
+
+<dl><dt><a name="slider-mouse_move"><strong>mouse_move</strong></a>(self, x, y, **event_args)</dt></dl>
+
+<dl><dt><a name="slider-mouse_up"><strong>mouse_up</strong></a>(self, x, y, button, **event_args)</dt></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>default_colour</strong> = '#318fdb'</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-arrow"><strong>arrow</strong></a>(canvas, length, width, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;horizontal&nbsp;arrow&nbsp;of&nbsp;length&nbsp;and&nbsp;width&nbsp;starting&nbsp;at&nbsp;middle&nbsp;of&nbsp;base&nbsp;at&nbsp;x,y.</tt></dd></dl>
+ <dl><dt><a name="-border"><strong>border</strong></a>(canvas, thickness, colour, xu<font color="#909090">=1</font>)</dt><dd><tt>Draw&nbsp;border&nbsp;of&nbsp;thickness&nbsp;and&nbsp;colour&nbsp;on&nbsp;canvas&nbsp;which&nbsp;has&nbsp;been&nbsp;scaled&nbsp;by&nbsp;xu.</tt></dd></dl>
+ <dl><dt><a name="-cart_arrows"><strong>cart_arrows</strong></a>(canvas, vector, line_width, arrow_scale<font color="#909090">=0.15</font>, colours<font color="#909090">={'x': '#444242', 'y': '#444242', 'z': '#444242'}</font>, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;cartesian&nbsp;components&nbsp;of&nbsp;vector&nbsp;(physics.vector3&nbsp;type)&nbsp;with&nbsp;colours.</tt></dd></dl>
+ <dl><dt><a name="-circle"><strong>circle</strong></a>(canvas, radius, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;circle&nbsp;of&nbsp;radius&nbsp;at&nbsp;x,&nbsp;y.</tt></dd></dl>
+ <dl><dt><a name="-clear_canvas"><strong>clear_canvas</strong></a>(canvas, colour<font color="#909090">='#fff'</font>)</dt><dd><tt>Fill&nbsp;canvas&nbsp;with&nbsp;colour.</tt></dd></dl>
+ <dl><dt><a name="-dashed_line"><strong>dashed_line</strong></a>(canvas, dashlength, x2, y2, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;dashed&nbsp;line&nbsp;from&nbsp;x,&nbsp;y&nbsp;to&nbsp;x2,&nbsp;y2,&nbsp;each&nbsp;segment&nbsp;of&nbsp;length&nbsp;dashlength.<br>
+&nbsp;<br>
+Emulates&nbsp;"line_to"&nbsp;behaviour&nbsp;of&nbsp;canvas,&nbsp;i.e&nbsp;does&nbsp;not&nbsp;begin&nbsp;or&nbsp;close&nbsp;path.</tt></dd></dl>
+ <dl><dt><a name="-eq_triangle"><strong>eq_triangle</strong></a>(canvas, side, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;upward&nbsp;equilateral&nbsp;triangle&nbsp;with&nbsp;bottom&nbsp;left&nbsp;corner&nbsp;at&nbsp;x,&nbsp;y.</tt></dd></dl>
+ <dl><dt><a name="-paths"><strong>paths</strong></a>(canvas, paths, thickness, colour)</dt><dd><tt>Draw&nbsp;dashed&nbsp;line&nbsp;of&nbsp;colour&nbsp;and&nbsp;thickness&nbsp;joining&nbsp;list&nbsp;of&nbsp;paths.<br>
+&nbsp;<br>
+Each&nbsp;list&nbsp;in&nbsp;paths&nbsp;must&nbsp;be&nbsp;a&nbsp;list&nbsp;of&nbsp;physics.vector3&nbsp;types.</tt></dd></dl>
+ <dl><dt><a name="-polygon"><strong>polygon</strong></a>(canvas, sides, length, x<font color="#909090">=0</font>, y<font color="#909090">=0</font>)</dt><dd><tt>Draw&nbsp;regular&nbsp;polygon&nbsp;with&nbsp;sides&nbsp;of&nbsp;length,&nbsp;at&nbsp;x,&nbsp;y.</tt></dd></dl>
+ <dl><dt><a name="-reset2"><strong>reset2</strong></a>(canvas, xu)</dt><dd><tt>Custom&nbsp;canvas&nbsp;reset&nbsp;function.&nbsp;Scales&nbsp;to&nbsp;xu,&nbsp;and&nbsp;places&nbsp;origin&nbsp;at&nbsp;bottom&nbsp;left.</tt></dd></dl>
+ <dl><dt><a name="-vel_arrows"><strong>vel_arrows</strong></a>(canvas, ball, line_width, arrow_scale<font color="#909090">=0.15</font>)</dt><dd><tt>Draw&nbsp;x,&nbsp;y&nbsp;components&nbsp;and&nbsp;velocity&nbsp;arrow&nbsp;of&nbsp;physics.ball&nbsp;object.</tt></dd></dl>
+ <dl><dt><a name="-wavelength_to_rgb"><strong>wavelength_to_rgb</strong></a>(wavelength, gamma<font color="#909090">=0.8</font>)</dt><dd><tt>This&nbsp;converts&nbsp;a&nbsp;given&nbsp;wavelength&nbsp;of&nbsp;light&nbsp;to&nbsp;an<br>
+approximate&nbsp;RGB&nbsp;color&nbsp;value.&nbsp;The&nbsp;wavelength&nbsp;must&nbsp;be&nbsp;given<br>
+in&nbsp;nanometers&nbsp;in&nbsp;the&nbsp;range&nbsp;from&nbsp;380&nbsp;nm&nbsp;through&nbsp;750&nbsp;nm<br>
+(789&nbsp;THz&nbsp;through&nbsp;400&nbsp;THz).<br>
+&nbsp;<br>
+Based&nbsp;on&nbsp;code&nbsp;by&nbsp;Dan&nbsp;Bruton<br>
+<a href="http://www.physics.sfasu.edu/astro/color/spectra.html">http://www.physics.sfasu.edu/astro/color/spectra.html</a></tt></dd></dl>
+</td></tr></table>
+</body></html>
